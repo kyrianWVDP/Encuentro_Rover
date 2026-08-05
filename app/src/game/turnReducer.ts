@@ -45,7 +45,7 @@ function spinToClan(
 ): GameState {
   const pending = getPendingClans(CLANS, state.round.playedClanIds);
   const clan = pickClan(pending, rng);
-  const rotationDeg = targetWheelRotationDeg(clanSectorIndex(clan.id));
+  const rotationDeg = targetWheelRotationDeg(clanSectorIndex(clan.id), state.rotationDeg);
   return {
     ...state,
     turn: {

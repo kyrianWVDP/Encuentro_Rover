@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CLANS } from "./clans";
 import { QUESTIONS } from "./questions";
 import { initialGameState, turnReducer } from "./turnReducer";
+import { SPIN_EXTRA_TURNS } from "./spin";
 
 const rng0 = () => 0;
 
@@ -41,5 +42,20 @@ describe("turnReducer", () => {
     }
     expect(s.round.roundNumber).toBe(2);
     expect(s.round.playedClanIds).toEqual([]);
+  });
+
+  it("successive spins produce a rotation delta >= SPIN_EXTRA_TURNS * 360 - small tolerance", () => {
+    let s = initialGameState();
+    s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+    const rot1 = s.rotationDeg;
+    
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "SHOW_QUESTION", rng: () => 0 });
+    s = turnReducer(s, { type: "NEXT_TURN" });
+
+    s = turnReducer(s, { type: "SPIN", rng: () => 0.5 });
+    const rot2 = s.rotationDeg;
+    
+    expect(rot2 - rot1).toBeGreaterThanOrEqual(SPIN_EXTRA_TURNS * 360 - 720);
   });
 });

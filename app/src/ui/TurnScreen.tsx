@@ -46,6 +46,12 @@ export function TurnScreen() {
         )}
       </main>
 
+      {state.error && (
+        <div className="error-banner" style={{ background: "#fee", color: "#c00", padding: "10px", margin: "10px", borderRadius: "4px", border: "1px solid #c00", fontWeight: "bold" }}>
+          Error: {state.error}
+        </div>
+      )}
+
       <footer className="host-controls">
         {state.turn.phase === "idle" && (
           <button onClick={() => dispatch({ type: "SPIN" })}>Girar</button>

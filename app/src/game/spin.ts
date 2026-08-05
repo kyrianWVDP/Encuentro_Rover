@@ -18,10 +18,13 @@ export function angleForClanIndex(
   return index * sectorDegrees;
 }
 
-export function targetWheelRotationDeg(clanIndex: number, extraTurns = SPIN_EXTRA_TURNS): number {
-  // Pointer at top: rotate so sector center is at 0° (calibrate later with OFFSET_DEG if needed)
+export function targetWheelRotationDeg(
+  clanIndex: number,
+  currentRotationDeg: number,
+  extraTurns = SPIN_EXTRA_TURNS,
+): number {
   const OFFSET_DEG = sectorCenterOffset(clanIndex);
-  return extraTurns * 360 + OFFSET_DEG;
+  return currentRotationDeg - (currentRotationDeg % 360) + extraTurns * 360 + OFFSET_DEG;
 }
 
 function sectorCenterOffset(clanIndex: number): number {
