@@ -108,7 +108,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
           round,
           turn: {
             ...state.turn,
-            phase: "question",
+            phase: "questionRunning",
             selectedQuestionId: question.id,
           },
           error: null,
@@ -116,7 +116,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
       }
 
       case "NEXT_TURN": {
-        if (state.turn.phase !== "question") return state;
+        if (state.turn.phase !== "questionRunning") return state;
         return {
           ...state,
           turn: {

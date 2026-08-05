@@ -27,7 +27,7 @@ describe("turnReducer", () => {
     let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
     s = turnReducer(s, { type: "SPIN_FINISHED" });
     s = turnReducer(s, { type: "SHOW_QUESTION", rng: rng0 });
-    expect(s.turn.phase).toBe("question");
+    expect(s.turn.phase).toBe("questionRunning");
     expect(s.round.playedClanIds).toContain(CLANS[0].id);
     expect(s.round.usedQuestionIds).toContain(QUESTIONS[0].id);
   });

@@ -11,7 +11,22 @@ export type Question = {
   respuestaCorrecta: string;
 };
 
-export type TurnPhase = "idle" | "spinning" | "clanRevealed" | "question";
+export type Judgement = "correct" | "incorrect";
+
+export type TurnPhase =
+  | "idle"
+  | "spinning"
+  | "clanRevealed"
+  | "questionRunning"
+  | "awaitingJudgement"
+  | "revealAnswer"
+  | "showScores";
+
+export type TimerState = {
+  running: boolean;
+  endsAt: number | null;
+  remainingMs: number;
+};
 
 export type RoundState = {
   roundNumber: number;
