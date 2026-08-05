@@ -1,5 +1,6 @@
 import React from "react";
 import type { Clan } from "../game/types";
+import { ClanAvatar } from "./ClanAvatar";
 
 type ScoreTableProps = {
   scores: Record<string, number>;
@@ -43,14 +44,13 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
               >
                 <td>{index + 1}</td>
                 <td>
-                  <div className="clan-cell">
-                    {clan.logoUrl && (
-                      <img
-                        src={clan.logoUrl}
-                        alt={`Logo ${clan.nombre}`}
-                        className="clan-logo-small"
-                      />
-                    )}
+                  <div className="clan-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ClanAvatar
+                      nombre={clan.nombre}
+                      logoUrl={clan.logoUrl}
+                      color={clan.color}
+                      size={24}
+                    />
                     <span
                       style={{
                         color: isHighlighted ? clan.color : "inherit",

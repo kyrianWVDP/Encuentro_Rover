@@ -2,7 +2,7 @@ export type Clan = {
   id: string;
   nombre: string;
   color?: string;
-  logoUrl?: string;
+  logoUrl?: string | null;
 };
 
 export type Question = {

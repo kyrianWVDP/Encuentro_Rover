@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Clan } from '../game/types';
 import { SPIN_DURATION_MS } from '../game/spin';
+import { ClanAvatar } from './ClanAvatar';
 import './RouletteWheel.css';
 
 type RouletteWheelProps = {
@@ -44,8 +45,20 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
                 transform: `rotate(${i * sectorDegrees}deg) translateY(-110px)`,
               }}
             >
-              <div className="roulette-label" style={{ transform: `rotate(${-i * sectorDegrees}deg)` }}>
-                {clan.nombre}
+              <div className="roulette-label" style={{ 
+                transform: `rotate(${-i * sectorDegrees}deg)`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <ClanAvatar
+                  nombre={clan.nombre}
+                  logoUrl={clan.logoUrl}
+                  color={clan.color}
+                  size={32}
+                />
+                <span>{clan.nombre}</span>
               </div>
             </div>
           );
