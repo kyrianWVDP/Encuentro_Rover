@@ -117,9 +117,14 @@ export function PublicScreen() {
   return (
     <main className="public-screen">
       {renderContent()}
-      <Link to="/host" className="host-link-discrete">
-        Host
-      </Link>
+      <div className="bottom-links">
+        <Link to="/host" className="host-link-discrete">
+          Host
+        </Link>
+        <Link to="/setup" className="host-link-discrete">
+          Setup
+        </Link>
+      </div>
     </main>
   );
 }

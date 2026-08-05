@@ -86,6 +86,9 @@ export function HostScreen() {
           <Link to="/" target="_blank" className="public-link">
             Abrir Proyector
           </Link>
+          <Link to="/setup" className="public-link" style={{ marginLeft: '1rem' }}>
+            Setup
+          </Link>
         </div>
         <div className="header-right">
           <h2>Ronda {round.roundNumber}</h2>
