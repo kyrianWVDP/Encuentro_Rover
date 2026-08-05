@@ -1,10 +1,209 @@
-import { TurnScreen } from "./TurnScreen";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { turnReducer, initialGameState } from "../game/turnReducer";
+import type { Action, GameState } from "../game/turnReducer";
+import { publishGameState, loadGameState } from "../game/sync";
+import { CLANS } from "../game/clans";
+import { QUESTIONS } from "../game/questions";
+import { SPIN_DURATION_MS } from "../game/spin";
+import { ScoreTable } from "./ScoreTable";
+import { TimerDisplay } from "./TimerDisplay";
+import { ConfirmModal } from "./ConfirmModal";
+import "./HostScreen.css";
 
 export function HostScreen() {
+  const [state, setState] = useState<GameState>(() => loadGameState() ?? initialGameState());
+  const [now, setNow] = useState(Date.now());
+
+  const dispatch = (action: Action) => {
+    setState((prev) => {
+      const next = turnReducer(prev, action);
+      publishGameState(next);
+      return next;
+    });
+  };
+
+  // Timer tick
+  useEffect(() => {
+    let frame: number;
+    const tick = () => {
+      setNow(Date.now());
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  // Effect for SPIN_FINISHED
+  useEffect(() => {
+    if (state.turn.phase === "spinning") {
+      const t = window.setTimeout(() => {
+        dispatch({ type: "SPIN_FINISHED" });
+      }, SPIN_DURATION_MS);
+      return () => clearTimeout(t);
+    }
+  }, [state.turn.phase, state.rotationDeg]);
+
+  // Effect for STOP_TIMER when time is up
+  useEffect(() => {
+    if (state.timer?.running && state.timer.endsAt) {
+      if (now >= state.timer.endsAt) {
+        dispatch({ type: "STOP_TIMER", nowMs: now });
+      }
+    }
+  }, [state.timer?.running, state.timer?.endsAt, now]);
+
+  const { turn, round, scores, timer, regularComplete, error, pendingJudgement } = state;
+  const { phase, selectedClanId, selectedQuestionId } = turn;
+
+  const question = selectedQuestionId
+    ? QUESTIONS.find((q) => q.id === selectedQuestionId)
+    : null;
+
+  const showAnswerForHost =
+    question &&
+    (phase === "questionRunning" ||
+      phase === "awaitingJudgement" ||
+      phase === "revealAnswer" ||
+      phase === "showScores");
+
+  const handleConfirmJudge = () => {
+    dispatch({ type: "CONFIRM_JUDGE" });
+  };
+
+  const handleCancelJudge = () => {
+    dispatch({ type: "CANCEL_JUDGE" });
+  };
+
   return (
-    <main>
-      <h1>Host</h1>
-      <TurnScreen />
+    <main className="host-screen">
+      <header className="host-header">
+        <div className="header-left">
+          <h1>Panel de Control (Host)</h1>
+          <Link to="/" target="_blank" className="public-link">
+            Abrir Proyector
+          </Link>
+        </div>
+        <div className="header-right">
+          <h2>Ronda {round.roundNumber}</h2>
+        </div>
+      </header>
+
+      {error && (
+        <div className="error-banner">
+          Error: {error}
+        </div>
+      )}
+
+      {regularComplete ? (
+        <div className="host-content">
+          <h2>Fase regular terminada</h2>
+          <ScoreTable scores={scores} clans={CLANS} />
+        </div>
+      ) : (
+        <div className="host-content">
+          <div className="host-main-panel">
+            <div className="status-panel">
+              <h3>Estado: {phase}</h3>
+              {selectedClanId && (
+                <p>
+                  <strong>Clan seleccionado:</strong>{" "}
+                  {CLANS.find((c) => c.id === selectedClanId)?.nombre}
+                </p>
+              )}
+            </div>
+
+            {question && (
+              <div className="question-panel">
+                <h3>Pregunta</h3>
+                <p className="question-text">{question.texto}</p>
+                {showAnswerForHost && (
+                  <div className="answer-block">
+                    <h4>Respuesta correcta:</h4>
+                    <p className="answer-text">{question.respuestaCorrecta}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {timer && (
+              <div className="timer-panel">
+                <TimerDisplay
+                  endsAt={timer.endsAt}
+                  running={timer.running}
+                  remainingMs={timer.remainingMs}
+                />
+              </div>
+            )}
+
+            <div className="controls-panel">
+              {phase === "idle" && (
+                <button onClick={() => dispatch({ type: "SPIN" })}>Girar</button>
+              )}
+              {phase === "clanRevealed" && (
+                <>
+                  <button onClick={() => dispatch({ type: "RESPIN" })}>
+                    Volver a girar
+                  </button>
+                  <button onClick={() => dispatch({ type: "START_QUESTION", nowMs: Date.now() })}>
+                    Mostrar pregunta
+                  </button>
+                </>
+              )}
+              {phase === "questionRunning" && (
+                <>
+                  <button onClick={() => dispatch({ type: "STOP_TIMER", nowMs: Date.now() })}>
+                    Cortar tiempo
+                  </button>
+                  <button onClick={() => dispatch({ type: "RESTART_TIMER", nowMs: Date.now() })}>
+                    Reiniciar timer
+                  </button>
+                  <button onClick={() => dispatch({ type: "ABORT_TURN_RESPIN" })}>
+                    Re-girar
+                  </button>
+                </>
+              )}
+              {phase === "awaitingJudgement" && (
+                <>
+                  <button
+                    className="correct-btn"
+                    onClick={() => dispatch({ type: "REQUEST_JUDGE", judgement: "correct", nowMs: Date.now() })}
+                  >
+                    Correcta
+                  </button>
+                  <button
+                    className="incorrect-btn"
+                    onClick={() => dispatch({ type: "REQUEST_JUDGE", judgement: "incorrect", nowMs: Date.now() })}
+                  >
+                    Incorrecta
+                  </button>
+                </>
+              )}
+              {phase === "revealAnswer" && (
+                <button onClick={() => dispatch({ type: "ACK_REVEAL" })}>Continuar</button>
+              )}
+              {phase === "showScores" && (
+                <button onClick={() => dispatch({ type: "ACK_SCORES" })}>Siguiente turno</button>
+              )}
+            </div>
+          </div>
+
+          <aside className="host-sidebar">
+            <h3>Puntajes</h3>
+            <ScoreTable scores={scores} clans={CLANS} highlightClanId={selectedClanId} />
+          </aside>
+        </div>
+      )}
+
+      <ConfirmModal
+        open={pendingJudgement !== null}
+        title="Confirmar Juicio"
+        message={`¿Estás seguro de marcar la respuesta como ${
+          pendingJudgement === "correct" ? "CORRECTA (+10 pts)" : "INCORRECTA (0 pts)"
+        }?`}
+        onConfirm={handleConfirmJudge}
+        onCancel={handleCancelJudge}
+      />
     </main>
   );
 }
