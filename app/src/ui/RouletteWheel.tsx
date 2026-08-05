@@ -25,7 +25,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
         className="roulette-wheel"
         style={{
           transform: `rotate(${rotationDeg}deg)`,
-          transition: spinning || rotationDeg > 0 ? `transform ${durationMs}ms cubic-bezier(0.12, 0.8, 0.2, 1)` : 'none'
+          transition: spinning ? `transform ${durationMs}ms cubic-bezier(0.12, 0.8, 0.2, 1)` : 'none'
         }}
       >
         {CLANS.map((clan, i) => {
