@@ -1,8 +1,16 @@
-import { TurnScreen } from './ui/TurnScreen'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PublicScreen } from "./ui/PublicScreen";
+import { HostScreen } from "./ui/HostScreen";
+import "./App.css";
 
-function App() {
-  return <TurnScreen />
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<PublicScreen />} />
+        <Route path="/host" element={<HostScreen />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App
