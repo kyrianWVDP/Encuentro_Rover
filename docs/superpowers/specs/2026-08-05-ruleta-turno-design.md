@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-05  
 **Proyecto:** Justas del Saber — Encuentro Rover 2026  
-**Estado:** Aprobado (2026-08-05)  
+**Estado:** Implementado — alcance B (2026-08-05)  
 **Stack:** React + Vite + TypeScript  
 
 ## 1. Objetivo
@@ -88,6 +88,8 @@ type TurnState = {
 
 Fixtures iniciales: 8 clanes del cuestionario; subset o banco completo de preguntas (mínimo suficiente para demos; ideal parsear el PDF después).
 
+**Nota de implementación (2026-08-05):** El banco completo del PDF del cuestionario queda **diferido** a una tarea posterior de import. Alcance B usa **12 preguntas fixture** en `app/src/game/questions.ts`. El arte `ruleta-fondo.png` aún no está cableado; la ruleta usa disco sólido + labels (fallback del §6).
+
 ## 5. Módulos / responsabilidades
 
 | Módulo | Responsabilidad |
@@ -137,10 +139,10 @@ Funciones de sorteo y ángulos: **puras** (inyectar `rng` en tests).
 
 ## 10. Criterio de hecho (alcance B)
 
-- [ ] App Vite arranca en local
-- [ ] Se ven 8 clanes sobre el fondo del encuentro
-- [ ] Girar sortea solo pendientes; jugados quedan apagados
-- [ ] Re-giro no consume clan ni pregunta
-- [ ] Mostrar pregunta revela texto al azar no repetido
-- [ ] Al completar 8 turnos, empieza ronda nueva
-- [ ] Tests unitarios de sorteo/ronda en verde
+- [x] App Vite arranca en local
+- [x] Se ven 8 clanes sobre el fondo del encuentro (fallback disco sólido; PNG pendiente)
+- [x] Girar sortea solo pendientes; jugados quedan apagados
+- [x] Re-giro no consume clan ni pregunta
+- [x] Mostrar pregunta revela texto al azar no repetido
+- [x] Al completar 8 turnos, empieza ronda nueva
+- [x] Tests unitarios de sorteo/ronda en verde
