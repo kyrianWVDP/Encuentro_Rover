@@ -68,6 +68,42 @@ describe("turnReducer", () => {
     expect(s.round.playedClanIds).toContain(clanId);
   });
 
+  it("START_QUESTION -> STOP_TIMER -> REQUEST_JUDGE -> CONFIRM_JUDGE works", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    
+    s = turnReducer(s, { type: "STOP_TIMER" });
+    expect(s.turn.phase).toBe("awaitingJudgement");
+    expect(s.timer?.running).toBe(false);
+
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    expect(s.turn.phase).toBe("awaitingJudgement");
+    expect(s.pendingJudgement).toBe("correct");
+
+    const clanId = s.turn.selectedClanId!;
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    
+    expect(s.turn.phase).toBe("revealAnswer");
+    expect(s.scores[clanId]).toBe(10);
+  });
+
+  it("CONFIRM_JUDGE incorrect leaves score unchanged (+0)", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+    
+    const clanId = s.turn.selectedClanId!;
+    const beforeScore = s.scores[clanId];
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    
+    expect(s.turn.phase).toBe("revealAnswer");
+    expect(s.scores[clanId]).toBe(beforeScore);
+    expect(s.lastJudgement).toBe("incorrect");
+    expect(s.pendingJudgement).toBeNull();
+  });
+
   it("RESTART_TIMER sets endsAt ~60s ahead", () => {
     let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
     s = turnReducer(s, { type: "SPIN_FINISHED" });

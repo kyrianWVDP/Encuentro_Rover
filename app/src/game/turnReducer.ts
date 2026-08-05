@@ -139,22 +139,26 @@ export function turnReducer(state: GameState, action: Action): GameState {
       }
 
       case "STOP_TIMER": {
+        if (state.turn.phase !== "questionRunning") return state;
         if (!state.timer || !state.timer.running) return state;
         return {
           ...state,
+          turn: { ...state.turn, phase: "awaitingJudgement" },
           timer: stopTimer(state.timer, action.nowMs ?? Date.now()),
         };
       }
 
       case "RESTART_TIMER": {
+        if (state.turn.phase !== "questionRunning" && state.turn.phase !== "awaitingJudgement") return state;
         return {
           ...state,
+          turn: { ...state.turn, phase: "questionRunning" },
           timer: restartTimer(60, action.nowMs ?? Date.now()),
         };
       }
 
       case "ABORT_TURN_RESPIN": {
-        if (state.turn.phase === "idle" || state.turn.phase === "spinning") return state;
+        if (state.turn.phase !== "questionRunning" && state.turn.phase !== "awaitingJudgement") return state;
         
         let round = state.round;
         if (state.turn.selectedQuestionId !== null) {
@@ -177,7 +181,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
       }
 
       case "REQUEST_JUDGE": {
-        if (state.turn.phase !== "questionRunning") return state;
+        if (state.turn.phase !== "questionRunning" && state.turn.phase !== "awaitingJudgement") return state;
         return {
           ...state,
           turn: { ...state.turn, phase: "awaitingJudgement" },

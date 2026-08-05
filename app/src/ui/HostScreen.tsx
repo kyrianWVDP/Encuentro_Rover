@@ -150,21 +150,19 @@ export function HostScreen() {
                   </button>
                 </>
               )}
-              {phase === "questionRunning" && (
+              {(phase === "questionRunning" || phase === "awaitingJudgement") && (
                 <>
-                  <button onClick={() => dispatch({ type: "STOP_TIMER", nowMs: Date.now() })}>
-                    Cortar tiempo
-                  </button>
+                  {phase === "questionRunning" && (
+                    <button onClick={() => dispatch({ type: "STOP_TIMER", nowMs: Date.now() })}>
+                      Cortar tiempo
+                    </button>
+                  )}
                   <button onClick={() => dispatch({ type: "RESTART_TIMER", nowMs: Date.now() })}>
                     Reiniciar timer
                   </button>
                   <button onClick={() => dispatch({ type: "ABORT_TURN_RESPIN" })}>
                     Re-girar
                   </button>
-                </>
-              )}
-              {phase === "awaitingJudgement" && (
-                <>
                   <button
                     className="correct-btn"
                     onClick={() => dispatch({ type: "REQUEST_JUDGE", judgement: "correct", nowMs: Date.now() })}

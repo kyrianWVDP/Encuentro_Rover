@@ -86,9 +86,9 @@ type TurnState = {
 };
 ```
 
-Fixtures iniciales: 8 clanes del cuestionario; subset o banco completo de preguntas (mínimo suficiente para demos; ideal parsear el PDF después).
+Fixtures: 8 clanes del cuestionario; **200 preguntas** del PDF oficial en `app/src/game/questions.ts` (textos únicos, sin duplicados “Variante N”).
 
-**Nota de implementación (2026-08-05):** El banco completo del PDF del cuestionario queda **diferido** a una tarea posterior de import. Alcance B usa **12 preguntas fixture** en `app/src/game/questions.ts`. El arte `ruleta-fondo.png` aún no está cableado; la ruleta usa disco sólido + labels (fallback del §6).
+**Nota de implementación (2026-08-05):** Banco importado del PDF. Ajustes menores: #7 respuesta completada; #37 ortografía; #109 solo “descubridor de Gilwell”. El arte `ruleta-fondo.png` aún no está cableado (fallback disco sólido + labels, §6).
 
 ## 5. Módulos / responsabilidades
 

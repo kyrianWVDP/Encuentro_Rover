@@ -39,5 +39,5 @@
 ## Commit
 
 ```
-docs: mark fase C acceptance criteria
+857caa3 docs: mark fase C acceptance criteria
 ```
