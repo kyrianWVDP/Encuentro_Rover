@@ -51,14 +51,25 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
                       color={clan.color}
                       size={24}
                     />
-                    <span
+                    <div
                       style={{
-                        color: isHighlighted ? clan.color : "inherit",
-                        fontWeight: isHighlighted ? "bold" : "normal",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "2px",
                       }}
                     >
-                      {clan.nombre}
-                    </span>
+                      <span
+                        style={{
+                          color: isHighlighted ? clan.color : "inherit",
+                          fontWeight: isHighlighted ? "bold" : "normal",
+                        }}
+                      >
+                        {clan.nombre}
+                      </span>
+                      {clan.representante && (
+                        <span className="clan-representante">{clan.representante}</span>
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td className="score-cell">{scores[clan.id] || 0}</td>

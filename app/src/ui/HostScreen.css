@@ -156,3 +156,26 @@
 .controls-panel button.incorrect-btn:hover {
   background-color: #d32f2f;
 }
+
+.controls-panel button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.controls-panel button:disabled:hover {
+  background-color: #bdc3c7;
+}
+
+.min-clans-warning {
+  margin: 0;
+  color: #c0392b;
+  font-weight: bold;
+  width: 100%;
+}
+
+.clan-representante {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666;
+  font-style: italic;
+}

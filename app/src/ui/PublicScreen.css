@@ -77,3 +77,21 @@
 .host-link-discrete:hover {
   color: rgba(255, 255, 255, 0.5);
 }
+
+.clan-reveal-info {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.clan-reveal-info h2 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #f1c40f;
+}
+
+.clan-representante {
+  margin: 0.5rem 0 0;
+  font-size: 1.5rem;
+  color: #ccc;
+  font-style: italic;
+}

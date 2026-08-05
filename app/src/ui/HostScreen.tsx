@@ -58,6 +58,10 @@ export function HostScreen() {
 
   const { turn, round, scores, timer, regularComplete, error, pendingJudgement } = state;
   const { phase, selectedClanId, selectedQuestionId } = turn;
+  const canSpin = clans.length >= 2;
+  const selectedClan = selectedClanId
+    ? clans.find((c) => c.id === selectedClanId)
+    : null;
 
   const question = selectedQuestionId
     ? activeQuestions.find((q) => q.id === selectedQuestionId)
@@ -111,11 +115,15 @@ export function HostScreen() {
           <div className="host-main-panel">
             <div className="status-panel">
               <h3>Estado: {phase}</h3>
-              {selectedClanId && (
-                <p>
-                  <strong>Clan seleccionado:</strong>{" "}
-                  {clans.find((c) => c.id === selectedClanId)?.nombre}
-                </p>
+              {selectedClan && (
+                <div className="selected-clan-info">
+                  <p>
+                    <strong>Clan seleccionado:</strong> {selectedClan.nombre}
+                  </p>
+                  {selectedClan.representante && (
+                    <p className="clan-representante">{selectedClan.representante}</p>
+                  )}
+                </div>
               )}
             </div>
 
@@ -144,7 +152,19 @@ export function HostScreen() {
 
             <div className="controls-panel">
               {phase === "idle" && (
-                <button onClick={() => dispatch({ type: "SPIN" })}>Girar</button>
+                <>
+                  <button
+                    onClick={() => dispatch({ type: "SPIN" })}
+                    disabled={!canSpin}
+                  >
+                    Girar
+                  </button>
+                  {!canSpin && (
+                    <p className="min-clans-warning">
+                      Se necesitan al menos 2 clanes para jugar.
+                    </p>
+                  )}
+                </>
               )}
               {phase === "clanRevealed" && (
                 <>

@@ -59,7 +59,10 @@ export function PublicScreen() {
         );
 
       case "spinning":
-      case "clanRevealed":
+      case "clanRevealed": {
+        const selectedClan = selectedClanId
+          ? clans.find((c) => c.id === selectedClanId)
+          : null;
         return (
           <div className="public-content">
             <RouletteWheel
@@ -69,8 +72,17 @@ export function PublicScreen() {
               spinning={phase === "spinning"}
               selectedClanId={selectedClanId}
             />
+            {phase === "clanRevealed" && selectedClan && (
+              <div className="clan-reveal-info">
+                <h2>{selectedClan.nombre}</h2>
+                {selectedClan.representante && (
+                  <p className="clan-representante">{selectedClan.representante}</p>
+                )}
+              </div>
+            )}
           </div>
         );
+      }
 
       case "questionRunning":
       case "awaitingJudgement":

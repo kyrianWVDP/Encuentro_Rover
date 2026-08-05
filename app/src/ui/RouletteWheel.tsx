@@ -59,6 +59,9 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
                   size={32}
                 />
                 <span>{clan.nombre}</span>
+                {clan.representante && (
+                  <span className="clan-representante">{clan.representante}</span>
+                )}
               </div>
             </div>
           );

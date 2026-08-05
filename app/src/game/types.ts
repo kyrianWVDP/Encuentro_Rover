@@ -1,6 +1,7 @@
 export type Clan = {
   id: string;
   nombre: string;
+  representante?: string;
   color?: string;
   logoUrl?: string | null;
 };
