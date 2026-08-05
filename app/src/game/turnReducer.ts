@@ -6,13 +6,24 @@ import {
   markClanPlayed,
 } from "./round";
 import { pickClan, targetWheelRotationDeg } from "./spin";
-import type { Rng, RoundState, TurnState } from "./types";
+import { applyJudgement, initialScores } from "./scoring";
+import { startTimer, stopTimer, restartTimer } from "./timer";
+import type { Rng, RoundState, TurnState, Judgement, TimerState } from "./types";
 
 export type Action =
   | { type: "SPIN"; rng?: Rng }
   | { type: "SPIN_FINISHED" }
   | { type: "RESPIN"; rng?: Rng }
-  | { type: "SHOW_QUESTION"; rng?: Rng }
+  | { type: "START_QUESTION"; rng?: Rng; nowMs?: number }
+  | { type: "SHOW_QUESTION"; rng?: Rng; nowMs?: number }
+  | { type: "STOP_TIMER"; nowMs?: number }
+  | { type: "RESTART_TIMER"; nowMs?: number }
+  | { type: "ABORT_TURN_RESPIN"; rng?: Rng }
+  | { type: "REQUEST_JUDGE"; judgement: Judgement; nowMs?: number }
+  | { type: "CANCEL_JUDGE" }
+  | { type: "CONFIRM_JUDGE" }
+  | { type: "ACK_REVEAL" }
+  | { type: "ACK_SCORES" }
   | { type: "NEXT_TURN" };
 
 export type GameState = {
@@ -20,9 +31,15 @@ export type GameState = {
   turn: TurnState;
   rotationDeg: number;
   error: string | null;
+  scores: Record<string, number>;
+  timer: TimerState | null;
+  lastJudgement: Judgement | null;
+  pendingJudgement: Judgement | null;
+  maxRounds: number;
+  regularComplete: boolean;
 };
 
-export function initialGameState(): GameState {
+export function initialGameState(clanIds: string[] = CLANS.map(c => c.id)): GameState {
   return {
     round: {
       roundNumber: 1,
@@ -36,6 +53,12 @@ export function initialGameState(): GameState {
     },
     rotationDeg: 0,
     error: null,
+    scores: initialScores(clanIds),
+    timer: null,
+    lastJudgement: null,
+    pendingJudgement: null,
+    maxRounds: 10,
+    regularComplete: false,
   };
 }
 
@@ -63,7 +86,7 @@ function withError(state: GameState, message: string): GameState {
 }
 
 export function turnReducer(state: GameState, action: Action): GameState {
-  const rng = action.type === "SPIN" || action.type === "RESPIN" || action.type === "SHOW_QUESTION"
+  const rng = action.type === "SPIN" || action.type === "RESPIN" || action.type === "SHOW_QUESTION" || action.type === "START_QUESTION" || action.type === "ABORT_TURN_RESPIN"
     ? (action.rng ?? Math.random)
     : Math.random;
 
@@ -71,6 +94,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
     switch (action.type) {
       case "SPIN": {
         if (state.turn.phase !== "idle") return state;
+        if (state.regularComplete) return withError(state, "Juego terminado.");
         return spinToClan(state, rng);
       }
 
@@ -88,6 +112,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
         return spinToClan(state, rng);
       }
 
+      case "START_QUESTION":
       case "SHOW_QUESTION": {
         if (state.turn.phase !== "clanRevealed" || !state.turn.selectedClanId) {
           return state;
@@ -97,26 +122,129 @@ export function turnReducer(state: GameState, action: Action): GameState {
           QUESTIONS,
           rng,
         );
-        let round = markClanPlayed(state.round, state.turn.selectedClanId);
-        round = {
-          ...round,
-          usedQuestionIds: [...round.usedQuestionIds, question.id],
-        };
-        round = advanceRoundIfComplete(round, CLANS.length);
         return {
           ...state,
-          round,
+          round: {
+            ...state.round,
+            usedQuestionIds: [...state.round.usedQuestionIds, question.id],
+          },
           turn: {
             ...state.turn,
             phase: "questionRunning",
             selectedQuestionId: question.id,
           },
+          timer: startTimer(60, action.nowMs ?? Date.now()),
           error: null,
         };
       }
 
-      case "NEXT_TURN": {
+      case "STOP_TIMER": {
+        if (!state.timer || !state.timer.running) return state;
+        return {
+          ...state,
+          timer: stopTimer(state.timer, action.nowMs ?? Date.now()),
+        };
+      }
+
+      case "RESTART_TIMER": {
+        return {
+          ...state,
+          timer: restartTimer(60, action.nowMs ?? Date.now()),
+        };
+      }
+
+      case "ABORT_TURN_RESPIN": {
+        if (state.turn.phase === "idle" || state.turn.phase === "spinning") return state;
+        
+        let round = state.round;
+        if (state.turn.selectedQuestionId !== null) {
+          round = {
+            ...round,
+            usedQuestionIds: round.usedQuestionIds.filter(id => id !== state.turn.selectedQuestionId),
+          };
+        }
+
+        const nextState = spinToClan({ ...state, round }, rng);
+        return {
+          ...nextState,
+          timer: null,
+          pendingJudgement: null,
+          turn: {
+            ...nextState.turn,
+            selectedQuestionId: null,
+          }
+        };
+      }
+
+      case "REQUEST_JUDGE": {
         if (state.turn.phase !== "questionRunning") return state;
+        return {
+          ...state,
+          turn: { ...state.turn, phase: "awaitingJudgement" },
+          pendingJudgement: action.judgement,
+          timer: state.timer && state.timer.running 
+            ? stopTimer(state.timer, action.nowMs ?? Date.now()) 
+            : state.timer,
+        };
+      }
+
+      case "CANCEL_JUDGE": {
+        if (state.turn.phase !== "awaitingJudgement") return state;
+        return {
+          ...state,
+          turn: { ...state.turn, phase: "questionRunning" },
+          pendingJudgement: null,
+        };
+      }
+
+      case "CONFIRM_JUDGE": {
+        if (state.turn.phase !== "awaitingJudgement" || !state.pendingJudgement || !state.turn.selectedClanId) {
+          return state;
+        }
+        
+        let round = markClanPlayed(state.round, state.turn.selectedClanId);
+        round = advanceRoundIfComplete(round, CLANS.length);
+        
+        return {
+          ...state,
+          round,
+          scores: applyJudgement(state.scores, state.turn.selectedClanId, state.pendingJudgement),
+          lastJudgement: state.pendingJudgement,
+          pendingJudgement: null,
+          turn: { ...state.turn, phase: "revealAnswer" },
+        };
+      }
+
+      case "ACK_REVEAL": {
+        if (state.turn.phase !== "revealAnswer") return state;
+        return {
+          ...state,
+          turn: { ...state.turn, phase: "showScores" },
+        };
+      }
+
+      case "ACK_SCORES":
+      case "NEXT_TURN": {
+        if (state.turn.phase !== "showScores" && state.turn.phase !== "questionRunning") {
+            // For backward compatibility NEXT_TURN allowed from questionRunning
+            if (action.type !== "NEXT_TURN") return state;
+        }
+
+        if (state.round.roundNumber > state.maxRounds) {
+          return {
+            ...state,
+            turn: {
+              ...state.turn,
+              phase: "idle",
+              selectedClanId: null,
+              selectedQuestionId: null,
+            },
+            regularComplete: true,
+            timer: null,
+            error: null,
+          };
+        }
+
         return {
           ...state,
           turn: {
@@ -124,6 +252,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
             selectedClanId: null,
             selectedQuestionId: null,
           },
+          timer: null,
           error: null,
         };
       }

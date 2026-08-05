@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { turnReducer, initialGameState } from "../game/turnReducer";
 import { CLANS } from "../game/clans";
 import { QUESTIONS } from "../game/questions";
@@ -8,6 +8,7 @@ import { RouletteWheel } from "./RouletteWheel";
 
 export function TurnScreen() {
   const [state, dispatch] = useReducer(turnReducer, initialGameState());
+  const [answerRevealed, setAnswerRevealed] = useState(false);
 
   useEffect(() => {
     if (state.turn.phase !== "spinning") return;
@@ -16,6 +17,12 @@ export function TurnScreen() {
     }, SPIN_DURATION_MS);
     return () => clearTimeout(t);
   }, [state.turn.phase, state.rotationDeg]);
+
+  useEffect(() => {
+    if (state.turn.phase !== "questionRunning" && state.turn.phase !== "revealAnswer" && state.turn.phase !== "showScores") {
+      setAnswerRevealed(false);
+    }
+  }, [state.turn.phase, state.turn.selectedQuestionId]);
 
   const pendingCount = getPendingClans(CLANS, state.round.playedClanIds).length;
   const selectedQuestion = QUESTIONS.find(
@@ -39,9 +46,17 @@ export function TurnScreen() {
           selectedClanId={state.turn.selectedClanId}
         />
 
-        {state.turn.phase === "question" && selectedQuestion && (
+        {(state.turn.phase === "questionRunning" || state.turn.phase === "awaitingJudgement" || state.turn.phase === "revealAnswer" || state.turn.phase === "showScores") && selectedQuestion && (
           <div className="question-card">
             <p className="question-text">{selectedQuestion.texto}</p>
+            {answerRevealed && (
+              <div className="answer-block">
+                <p className="answer-label">Respuesta correcta</p>
+                <p className="answer-text">
+                  {selectedQuestion.respuestaCorrecta}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -61,12 +76,17 @@ export function TurnScreen() {
             <button onClick={() => dispatch({ type: "RESPIN" })}>
               Volver a girar
             </button>
-            <button onClick={() => dispatch({ type: "SHOW_QUESTION" })}>
+            <button onClick={() => dispatch({ type: "START_QUESTION" })}>
               Mostrar pregunta
             </button>
           </>
         )}
-        {state.turn.phase === "question" && (
+        {state.turn.phase === "questionRunning" && !answerRevealed && (
+          <button onClick={() => setAnswerRevealed(true)}>
+            Mostrar respuesta
+          </button>
+        )}
+        {state.turn.phase === "questionRunning" && answerRevealed && (
           <button onClick={() => dispatch({ type: "NEXT_TURN" })}>
             Siguiente turno
           </button>

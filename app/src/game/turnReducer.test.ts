@@ -23,22 +23,87 @@ describe("turnReducer", () => {
     expect(s.turn.phase).toBe("spinning");
   });
 
-  it("SHOW_QUESTION marks clan and uses a question", () => {
+  it("START_QUESTION uses a question and starts timer", () => {
     let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
     s = turnReducer(s, { type: "SPIN_FINISHED" });
-    s = turnReducer(s, { type: "SHOW_QUESTION", rng: rng0 });
+    const nowMs = 1000;
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0, nowMs });
+    
     expect(s.turn.phase).toBe("questionRunning");
-    expect(s.round.playedClanIds).toContain(CLANS[0].id);
     expect(s.round.usedQuestionIds).toContain(QUESTIONS[0].id);
+    // Clan is NOT played yet
+    expect(s.round.playedClanIds).not.toContain(CLANS[0].id);
+    expect(s.timer?.running).toBe(true);
+    expect(s.timer?.endsAt).toBe(nowMs + 60_000);
   });
 
-  it("advances round after 8 SHOW_QUESTION cycles", () => {
+  it("REQUEST_JUDGE alone does not change scores", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    
+    const beforeScores = { ...s.scores };
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    
+    expect(s.turn.phase).toBe("awaitingJudgement");
+    expect(s.scores).toEqual(beforeScores);
+    expect(s.pendingJudgement).toBe("correct");
+    // Timer is stopped
+    expect(s.timer?.running).toBe(false);
+  });
+
+  it("CONFIRM_JUDGE correct adds 10, marks played, reveals answer", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    
+    const clanId = s.turn.selectedClanId!;
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    
+    expect(s.turn.phase).toBe("revealAnswer");
+    expect(s.scores[clanId]).toBe(10);
+    expect(s.lastJudgement).toBe("correct");
+    expect(s.pendingJudgement).toBeNull();
+    expect(s.round.playedClanIds).toContain(clanId);
+  });
+
+  it("RESTART_TIMER sets endsAt ~60s ahead", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0, nowMs: 0 });
+    
+    s = turnReducer(s, { type: "RESTART_TIMER", nowMs: 5000 });
+    expect(s.timer?.running).toBe(true);
+    expect(s.timer?.endsAt).toBe(5000 + 60_000);
+  });
+
+  it("ABORT_TURN_RESPIN restores question to unused", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    
+    const qId = s.turn.selectedQuestionId;
+    expect(s.round.usedQuestionIds).toContain(qId);
+    
+    s = turnReducer(s, { type: "ABORT_TURN_RESPIN", rng: () => 0.5 });
+    
+    expect(s.round.usedQuestionIds).not.toContain(qId);
+    expect(s.turn.phase).toBe("spinning");
+    expect(s.timer).toBeNull();
+    expect(s.turn.selectedQuestionId).toBeNull();
+  });
+
+  it("advances round after 8 complete cycles", () => {
     let s = initialGameState();
     for (let i = 0; i < 8; i++) {
       s = turnReducer(s, { type: "SPIN", rng: () => 0 });
       s = turnReducer(s, { type: "SPIN_FINISHED" });
-      s = turnReducer(s, { type: "SHOW_QUESTION", rng: () => 0 });
-      s = turnReducer(s, { type: "NEXT_TURN" });
+      s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+      s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+      s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+      s = turnReducer(s, { type: "ACK_REVEAL" });
+      s = turnReducer(s, { type: "ACK_SCORES" });
     }
     expect(s.round.roundNumber).toBe(2);
     expect(s.round.playedClanIds).toEqual([]);
@@ -50,12 +115,35 @@ describe("turnReducer", () => {
     const rot1 = s.rotationDeg;
     
     s = turnReducer(s, { type: "SPIN_FINISHED" });
-    s = turnReducer(s, { type: "SHOW_QUESTION", rng: () => 0 });
-    s = turnReducer(s, { type: "NEXT_TURN" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    s = turnReducer(s, { type: "ACK_REVEAL" });
+    s = turnReducer(s, { type: "ACK_SCORES" });
 
     s = turnReducer(s, { type: "SPIN", rng: () => 0.5 });
     const rot2 = s.rotationDeg;
     
     expect(rot2 - rot1).toBeGreaterThanOrEqual(SPIN_EXTRA_TURNS * 360 - 720);
+  });
+
+  it("regularComplete becomes true when round > maxRounds", () => {
+    let s = initialGameState();
+    s.maxRounds = 1; // force early end
+    for (let i = 0; i < 8; i++) {
+      s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+      s = turnReducer(s, { type: "SPIN_FINISHED" });
+      s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+      s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+      s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+      s = turnReducer(s, { type: "ACK_REVEAL" });
+      s = turnReducer(s, { type: "ACK_SCORES" });
+    }
+    expect(s.regularComplete).toBe(true);
+    expect(s.turn.phase).toBe("idle");
+    
+    // SPIN not allowed when regularComplete? 
+    // Wait, the spec says "mínimo: no permitir SPIN y set error o turn.phase stay + regularComplete: true".
+    // I should check spinToClan guard.
   });
 });
