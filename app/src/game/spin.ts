@@ -2,7 +2,6 @@ import type { Clan, Rng } from "./types";
 
 export const SPIN_EXTRA_TURNS = 5;
 export const SPIN_DURATION_MS = 3500;
-export const SECTOR_DEGREES = 45;
 
 export function pickClan(pending: Clan[], rng: Rng): Clan {
   if (pending.length === 0) throw new Error("No pending clans");
@@ -13,7 +12,7 @@ export function pickClan(pending: Clan[], rng: Rng): Clan {
 /** Degrees to rotate the wheel so sector `index` lands under the top pointer. */
 export function angleForClanIndex(
   index: number,
-  sectorDegrees: number = SECTOR_DEGREES,
+  sectorDegrees: number,
 ): number {
   return index * sectorDegrees;
 }
@@ -21,13 +20,14 @@ export function angleForClanIndex(
 export function targetWheelRotationDeg(
   clanIndex: number,
   currentRotationDeg: number,
+  sectorDegrees: number,
   extraTurns = SPIN_EXTRA_TURNS,
 ): number {
-  const OFFSET_DEG = sectorCenterOffset(clanIndex);
+  const OFFSET_DEG = sectorCenterOffset(clanIndex, sectorDegrees);
   return currentRotationDeg - (currentRotationDeg % 360) + extraTurns * 360 + OFFSET_DEG;
 }
 
-function sectorCenterOffset(clanIndex: number): number {
+function sectorCenterOffset(clanIndex: number, sectorDegrees: number): number {
   // Center of sector under pointer: negative rotation brings sector to top
-  return -(angleForClanIndex(clanIndex) + SECTOR_DEGREES / 2);
+  return -(angleForClanIndex(clanIndex, sectorDegrees) + sectorDegrees / 2);
 }

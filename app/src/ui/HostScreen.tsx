@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { turnReducer, initialGameState } from "../game/turnReducer";
 import type { Action, GameState } from "../game/turnReducer";
 import { publishGameState, loadGameState } from "../game/sync";
-import { CLANS } from "../game/clans";
+import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { SPIN_DURATION_MS } from "../game/spin";
 import { ScoreTable } from "./ScoreTable";
@@ -14,6 +14,9 @@ import "./HostScreen.css";
 export function HostScreen() {
   const [state, setState] = useState<GameState>(() => loadGameState() ?? initialGameState());
   const [now, setNow] = useState(Date.now());
+  const config = useMemo(() => loadEventConfig(), []);
+  const clans = config.clans;
+  const activeQuestions = useMemo(() => getActiveQuestions(config, QUESTIONS), [config]);
 
   const dispatch = (action: Action) => {
     setState((prev) => {
@@ -57,7 +60,7 @@ export function HostScreen() {
   const { phase, selectedClanId, selectedQuestionId } = turn;
 
   const question = selectedQuestionId
-    ? QUESTIONS.find((q) => q.id === selectedQuestionId)
+    ? activeQuestions.find((q) => q.id === selectedQuestionId)
     : null;
 
   const showAnswerForHost =
@@ -98,7 +101,7 @@ export function HostScreen() {
       {regularComplete ? (
         <div className="host-content">
           <h2>Fase regular terminada</h2>
-          <ScoreTable scores={scores} clans={CLANS} />
+          <ScoreTable scores={scores} clans={clans} />
         </div>
       ) : (
         <div className="host-content">
@@ -108,7 +111,7 @@ export function HostScreen() {
               {selectedClanId && (
                 <p>
                   <strong>Clan seleccionado:</strong>{" "}
-                  {CLANS.find((c) => c.id === selectedClanId)?.nombre}
+                  {clans.find((c) => c.id === selectedClanId)?.nombre}
                 </p>
               )}
             </div>
@@ -188,7 +191,7 @@ export function HostScreen() {
 
           <aside className="host-sidebar">
             <h3>Puntajes</h3>
-            <ScoreTable scores={scores} clans={CLANS} highlightClanId={selectedClanId} />
+            <ScoreTable scores={scores} clans={clans} highlightClanId={selectedClanId} />
           </aside>
         </div>
       )}

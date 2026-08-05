@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { loadGameState, subscribeGameState } from "../game/sync";
 import { initialGameState } from "../game/turnReducer";
@@ -7,14 +7,18 @@ import { RouletteWheel } from "./RouletteWheel";
 import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
 import { canShowAnswer } from "../game/selectors";
+import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
-import { CLANS } from "../game/clans";
 import "./PublicScreen.css";
 
 export function PublicScreen() {
   const [gameState, setGameState] = useState<GameState>(() => {
     return loadGameState() ?? initialGameState();
   });
+
+  const config = useMemo(() => loadEventConfig(), []);
+  const clans = config.clans;
+  const activeQuestions = useMemo(() => getActiveQuestions(config, QUESTIONS), [config]);
 
   useEffect(() => {
     return subscribeGameState(setGameState);
@@ -24,7 +28,7 @@ export function PublicScreen() {
   const { phase, selectedClanId, selectedQuestionId } = turn;
 
   const question = selectedQuestionId
-    ? QUESTIONS.find((q) => q.id === selectedQuestionId)
+    ? activeQuestions.find((q) => q.id === selectedQuestionId)
     : null;
 
   const renderContent = () => {
@@ -32,7 +36,7 @@ export function PublicScreen() {
       return (
         <div className="public-content">
           <h1>Fin de la Fase Regular</h1>
-          <ScoreTable scores={scores} clans={CLANS} />
+          <ScoreTable scores={scores} clans={clans} />
         </div>
       );
     }
@@ -42,13 +46,14 @@ export function PublicScreen() {
         return (
           <div className="public-content idle-layout">
             <RouletteWheel
+              clans={clans}
               playedClanIds={round.playedClanIds}
               rotationDeg={rotationDeg}
               spinning={false}
               selectedClanId={null}
             />
             <div className="idle-scores">
-              <ScoreTable scores={scores} clans={CLANS} />
+              <ScoreTable scores={scores} clans={clans} />
             </div>
           </div>
         );
@@ -58,6 +63,7 @@ export function PublicScreen() {
         return (
           <div className="public-content">
             <RouletteWheel
+              clans={clans}
               playedClanIds={round.playedClanIds}
               rotationDeg={rotationDeg}
               spinning={phase === "spinning"}
@@ -97,7 +103,7 @@ export function PublicScreen() {
           <div className="public-content">
             <ScoreTable
               scores={scores}
-              clans={CLANS}
+              clans={clans}
               highlightClanId={selectedClanId}
             />
           </div>

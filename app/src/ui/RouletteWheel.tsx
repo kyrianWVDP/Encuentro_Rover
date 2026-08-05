@@ -1,9 +1,10 @@
 import React from 'react';
-import { CLANS } from '../game/clans';
+import type { Clan } from '../game/types';
 import { SPIN_DURATION_MS } from '../game/spin';
 import './RouletteWheel.css';
 
 type RouletteWheelProps = {
+  clans: Clan[];
   playedClanIds: string[];
   rotationDeg: number;
   spinning: boolean;
@@ -12,12 +13,15 @@ type RouletteWheelProps = {
 };
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({
+  clans,
   playedClanIds,
   rotationDeg,
   spinning,
   selectedClanId,
   durationMs = SPIN_DURATION_MS,
 }) => {
+  const sectorDegrees = 360 / clans.length;
+
   return (
     <div className="roulette-container">
       <div className="roulette-pointer"></div>
@@ -28,7 +32,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
           transition: spinning ? `transform ${durationMs}ms cubic-bezier(0.12, 0.8, 0.2, 1)` : 'none'
         }}
       >
-        {CLANS.map((clan, i) => {
+        {clans.map((clan, i) => {
           const isPlayed = playedClanIds.includes(clan.id);
           const isSelected = clan.id === selectedClanId && !spinning;
           
@@ -37,10 +41,10 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
               key={clan.id}
               className={`roulette-sector ${isPlayed ? 'played' : ''} ${isSelected ? 'selected' : ''}`}
               style={{
-                transform: `rotate(${i * 45}deg) translateY(-110px)`,
+                transform: `rotate(${i * sectorDegrees}deg) translateY(-110px)`,
               }}
             >
-              <div className="roulette-label" style={{ transform: `rotate(${-i * 45}deg)` }}>
+              <div className="roulette-label" style={{ transform: `rotate(${-i * sectorDegrees}deg)` }}>
                 {clan.nombre}
               </div>
             </div>

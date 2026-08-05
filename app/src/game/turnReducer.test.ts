@@ -1,12 +1,26 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import { CLANS } from "./clans";
 import { QUESTIONS } from "./questions";
 import { initialGameState, turnReducer } from "./turnReducer";
 import { SPIN_EXTRA_TURNS } from "./spin";
+import { defaultEventConfig, saveEventConfig } from "./eventConfig";
 
 const rng0 = () => 0;
 
 describe("turnReducer", () => {
+  beforeEach(() => {
+    const store = new Map<string, string>();
+    globalThis.localStorage = {
+      getItem: (key: string) => store.get(key) || null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+      clear: () => store.clear(),
+      key: (n: number) => Array.from(store.keys())[n] ?? null,
+      length: 0,
+    } as Storage;
+    saveEventConfig(defaultEventConfig());
+  });
+
   it("SPIN selects a pending clan without marking played", () => {
     const s1 = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
     expect(s1.turn.phase).toBe("spinning");

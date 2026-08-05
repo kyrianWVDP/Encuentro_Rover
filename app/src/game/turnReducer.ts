@@ -1,4 +1,4 @@
-import { CLANS, clanSectorIndex } from "./clans";
+import { clanSectorIndex } from "./clans";
 import { QUESTIONS, pickRandomUnused } from "./questions";
 import {
   advanceRoundIfComplete,
@@ -8,6 +8,7 @@ import {
 import { pickClan, targetWheelRotationDeg } from "./spin";
 import { applyJudgement, initialScores } from "./scoring";
 import { startTimer, stopTimer, restartTimer } from "./timer";
+import { loadEventConfig, getActiveQuestions, type EventConfig } from "./eventConfig";
 import type { Rng, RoundState, TurnState, Judgement, TimerState } from "./types";
 
 export type Action =
@@ -36,10 +37,11 @@ export type GameState = {
   lastJudgement: Judgement | null;
   pendingJudgement: Judgement | null;
   maxRounds: number;
+  timerSec: number;
   regularComplete: boolean;
 };
 
-export function initialGameState(clanIds: string[] = CLANS.map(c => c.id)): GameState {
+export function initialGameState(clanIds: string[] = loadEventConfig().clans.map(c => c.id)): GameState {
   return {
     round: {
       roundNumber: 1,
@@ -58,17 +60,32 @@ export function initialGameState(clanIds: string[] = CLANS.map(c => c.id)): Game
     lastJudgement: null,
     pendingJudgement: null,
     maxRounds: 10,
+    timerSec: 60,
     regularComplete: false,
   };
+}
+
+export function initialGameStateFromConfig(config: EventConfig): GameState {
+  return {
+    ...initialGameState(config.clans.map(c => c.id)),
+    maxRounds: config.maxRounds,
+    timerSec: config.timerSec,
+  };
+}
+
+function activeClans() {
+  return loadEventConfig().clans;
 }
 
 function spinToClan(
   state: GameState,
   rng: Rng,
 ): GameState {
-  const pending = getPendingClans(CLANS, state.round.playedClanIds);
+  const clans = activeClans();
+  const pending = getPendingClans(clans, state.round.playedClanIds);
   const clan = pickClan(pending, rng);
-  const rotationDeg = targetWheelRotationDeg(clanSectorIndex(clan.id), state.rotationDeg);
+  const sectorDegrees = 360 / clans.length;
+  const rotationDeg = targetWheelRotationDeg(clanSectorIndex(clan.id, clans), state.rotationDeg, sectorDegrees);
   return {
     ...state,
     turn: {
@@ -117,9 +134,11 @@ export function turnReducer(state: GameState, action: Action): GameState {
         if (state.turn.phase !== "clanRevealed" || !state.turn.selectedClanId) {
           return state;
         }
+        const config = loadEventConfig();
+        const activeQs = getActiveQuestions(config, QUESTIONS);
         const question = pickRandomUnused(
           state.round.usedQuestionIds,
-          QUESTIONS,
+          activeQs,
           rng,
         );
         return {
@@ -133,7 +152,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
             phase: "questionRunning",
             selectedQuestionId: question.id,
           },
-          timer: startTimer(60, action.nowMs ?? Date.now()),
+          timer: startTimer(state.timerSec, action.nowMs ?? Date.now()),
           error: null,
         };
       }
@@ -153,7 +172,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
         return {
           ...state,
           turn: { ...state.turn, phase: "questionRunning" },
-          timer: restartTimer(60, action.nowMs ?? Date.now()),
+          timer: restartTimer(state.timerSec, action.nowMs ?? Date.now()),
         };
       }
 
@@ -206,8 +225,9 @@ export function turnReducer(state: GameState, action: Action): GameState {
           return state;
         }
         
+        const clans = activeClans();
         let round = markClanPlayed(state.round, state.turn.selectedClanId);
-        round = advanceRoundIfComplete(round, CLANS.length);
+        round = advanceRoundIfComplete(round, clans.length);
         
         return {
           ...state,
