@@ -2,14 +2,14 @@
 
 **Fecha:** 2026-08-05  
 **Fuente de verdad de producto:** cuestionario Emilio Agüero (completo)  
-**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`  
+**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`; **Fase D** — setup del evento (`/setup`), CRUD clanes, config, import preguntas  
 **App:** `app/` (React + Vite + TypeScript)
 
 ## 1. Mapa Emilio → estado
 
 | Pedido de Emilio | Estado | Fase |
 |------------------|--------|------|
-| 8 clanes; 1 representante (puntaje del clan) | Parcial (clanes sí; representantes no) | D |
+| 8 clanes; 1 representante (puntaje del clan) | Hecho | D |
 | Ruleta de clanes; una vez por ronda; 10 rondas | Hecho (tope 10 en reducer) | C |
 | Preguntas no se repiten (incl. desempate) | Hecho (pool 200 PDF) | — |
 | Pregunta al azar (sin ruleta de números) | Hecho (desvío acordado vs. audio Emilio) | — |
@@ -26,11 +26,11 @@
 | Animaciones clan / ruleta / tabla | Parcial (ruleta) | F |
 | Offline-first + guardado automático | Pendiente | G |
 | Pausa general | Pendiente | G |
-| CRUD clanes + logos + representantes editables | Pendiente | D |
-| Cargar banco preguntas | Hecho (fixtures TS); UI carga CSV luego | D |
+| CRUD clanes + logos + representantes editables | Hecho | D |
+| Cargar banco preguntas | Hecho (embebido + import CSV/JSON en `/setup`) | D |
 | Export PDF/Excel resultados | Pendiente | E |
-| Reiniciar competencia / reutilizar evento | Pendiente | D |
-| Config sin código (nombre, rondas, timer) | Pendiente | D |
+| Reiniciar competencia / reutilizar evento | Hecho (reiniciar partida; config intacta) | D |
+| Config sin código (nombre, rondas, timer) | Hecho (`/setup`) | D |
 | Arte fondo encuentro en ruleta | Pendiente (fallback sólido) | F |
 | Título Encuentro Rover 2026 / Justas del Saber | Hecho | — |
 
@@ -52,12 +52,14 @@ Cada fase = **spec** (`docs/superpowers/specs/`) → **plan** (`docs/superpowers
 
 **Spec:** `2026-08-05-fase-c-juicio-timer-host.md` — 34 tests en verde.
 
-### Fase D — Datos y setup del evento
+### Fase D — Datos y setup del evento ✅ **Implementado**
 - Representantes por clan (editables hasta el último momento)
-- CRUD clanes + logos (PNG)
+- CRUD clanes + logos (PNG) o iniciales sin logo
 - Import CSV/JSON del banco (además del PDF ya embebido)
-- Config: nombre evento, nº rondas, segundos
-- Reiniciar competencia limpia
+- Config: nombre evento, nº rondas, segundos (`/setup`)
+- Reiniciar partida limpia (config intacta)
+
+**Spec:** `2026-08-05-fase-d-setup-event.md` — 54 tests en verde.
 
 ### Fase E — Cierre y desempate
 - Pantalla final: podio + tabla completa
@@ -94,6 +96,7 @@ C bloquea el ensayo útil. D puede avanzar en paralelo de contenido (logos). G p
 
 ## 5. Próximo entregable de diseño
 
-**Spec Fase D** — CRUD clanes, representantes, logos, config del evento.
+**Spec Fase E** — podio, mata-mata y export de resultados.
 
-Fase C cerrada (2026-08-05): spec + plan + SDD + implementación + criterios §10 verificados.
+Fase C cerrada (2026-08-05): spec + plan + SDD + implementación + criterios §10 verificados.  
+Fase D cerrada (2026-08-05): spec + SDD + implementación + criterios §9 verificados.

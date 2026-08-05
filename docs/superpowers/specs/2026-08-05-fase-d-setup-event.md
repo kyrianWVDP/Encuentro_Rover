@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-05  
 **Proyecto:** Justas del Saber — Encuentro Rover 2026  
-**Estado:** Aprobado (2026-08-05)  
+**Estado:** Implementado — Fase D (2026-08-05)  
 **Stack:** React + Vite + TypeScript (`app/`)  
 **Depende de:** Fase C + roadmap `2026-08-05-roadmap-post-b.md`  
 **Fuente producto:** cuestionario Emilio Agüero
@@ -108,14 +108,14 @@ type EventConfig = {
 
 ## 9. Criterio de hecho
 
-- [ ] `/setup` edita título, rondas, timer y persiste  
-- [ ] Agregar/editar/borrar clanes; representante editable  
-- [ ] Clan sin logo muestra iniciales en ruleta/UI  
-- [ ] Logos existentes se ven desde `/logos/`  
-- [ ] Reiniciar partida limpia scores/rondas/usadas sin borrar clanes  
-- [ ] Import preguntas opcional + volver a embebido  
-- [ ] Host/público usan config (no solo hardcode)  
-- [ ] Tests D en verde  
+- [x] `/setup` edita título, rondas, timer y persiste  
+- [x] Agregar/editar/borrar clanes; representante editable  
+- [x] Clan sin logo muestra iniciales en ruleta/UI  
+- [x] Logos existentes se ven desde `/logos/`  
+- [x] Reiniciar partida limpia scores/rondas/usadas sin borrar clanes  
+- [x] Import preguntas opcional + volver a embebido  
+- [x] Host/público usan config (no solo hardcode)  
+- [x] Tests D en verde  
 
 ## 10. Módulos previstos
 
