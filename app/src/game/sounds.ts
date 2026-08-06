@@ -32,6 +32,17 @@ let unlocked = false;
 
 export function unlockAudio(): void {
   unlocked = true;
+  const url = soundUrl("spin");
+  if (!url) return;
+  try {
+    const audio = new Audio(url);
+    audio.volume = 0;
+    void audio.play().catch(() => {
+      /* autoplay blocked until user gesture */
+    });
+  } catch {
+    /* ignore */
+  }
 }
 
 export function playSound(event: SoundEvent): void {

@@ -5,6 +5,8 @@ import {
   isMuted,
   setMuted,
   playSound,
+  unlockAudio,
+  isAudioUnlocked,
   MUTE_STORAGE_KEY,
 } from "./sounds";
 
@@ -39,5 +41,26 @@ describe("sounds", () => {
     expect(() => playSound("spin")).not.toThrow();
     setMuted(false);
     expect(() => playSound("start")).not.toThrow();
+  });
+
+  it("unlockAudio plays spin at volume 0 and sets unlocked", () => {
+    const play = vi.fn().mockResolvedValue(undefined);
+    const MockAudio = vi.fn(function (
+      this: { volume: number; play: typeof play },
+      url: string,
+    ) {
+      this.volume = 1;
+      this.play = play;
+      return this;
+    });
+    vi.stubGlobal("Audio", MockAudio);
+
+    expect(isAudioUnlocked()).toBe(false);
+    unlockAudio();
+
+    expect(MockAudio).toHaveBeenCalledWith("/sounds/spin.mp3");
+    expect(MockAudio.mock.instances[0].volume).toBe(0);
+    expect(play).toHaveBeenCalled();
+    expect(isAudioUnlocked()).toBe(true);
   });
 });
