@@ -29,11 +29,13 @@ export function PublicScreen() {
 
   useGameSounds(gameState);
 
+  const [audioReady, setAudioReady] = useState(false);
   const unlockedRef = useRef(false);
   const handleFirstInteraction = () => {
     if (unlockedRef.current) return;
     unlockedRef.current = true;
     unlockAudio();
+    setAudioReady(true);
   };
 
   const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds } = gameState;
@@ -151,6 +153,9 @@ export function PublicScreen() {
 
   return (
     <main className="public-screen" onClick={handleFirstInteraction}>
+      {!audioReady && (
+        <p className="audio-unlock-hint">Tocá la pantalla para activar el sonido</p>
+      )}
       {mode === "tiebreak" && (
         <div className="tiebreak-banner public-banner">
           <h1>MATA-MATA (Desempate)</h1>

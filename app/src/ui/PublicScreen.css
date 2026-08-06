@@ -78,6 +78,17 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.audio-unlock-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
 .clan-reveal-info {
   text-align: center;
   margin-top: 1rem;
