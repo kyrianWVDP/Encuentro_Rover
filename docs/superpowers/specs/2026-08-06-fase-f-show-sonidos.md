@@ -101,10 +101,10 @@ No disparar en re-renders sin cambio de fase. Re-giro (`RESPIN` → `spinning`) 
 ## 8. Criterio de hecho
 
 - [x] Los 4 MP3 viven en `app/public/sounds/` con nombres estables
-- [x] Giro / acierto / error / ganador final suenan en el proyector en el momento correcto
-- [x] Sin doble audio host+público
+- [x] Giro / acierto / error / ganador final suenan en el proyector en el momento correcto — verificado por tests unitarios (`soundTransitions.test.ts`) y arquitectura (`useGameSounds` + `playSound`); **walkthrough manual en navegador pendiente**
+- [x] Sin doble audio host+público — verificado por tests unitarios / arquitectura (host no llama `playSound`); **walkthrough manual en navegador pendiente**
 - [x] Stubs Inicio/10s/fin no rompen
-- [x] Mute en host silencia el proyector
+- [x] Mute en host silencia el proyector — verificado por tests unitarios / arquitectura (`playSound` corta antes de `new Audio` si `isMuted()`); **walkthrough manual en navegador pendiente**
 - [x] Anuncio de clan + highlight de fila visibles
 - [x] Fondo ruleta cableado **si** hay PNG; si no, fallback OK (`ruleta-fondo.png` aún no en repo; CSS + fallback gris activos)
 - [x] Tests F en verde

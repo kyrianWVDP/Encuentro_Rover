@@ -29,7 +29,7 @@
 | CRUD clanes + logos + representantes editables | Hecho | D |
 | Cargar banco preguntas | Hecho (embebido + import CSV/JSON en `/setup`) | D |
 | Export CSV resultados (Excel) | Hecho | E |
-| Export PDF resultados | Pendiente | F |
+| Export PDF resultados | Pendiente | post-F / G |
 | Reiniciar competencia / reutilizar evento | Hecho (reiniciar partida; config intacta) | D |
 | Config sin código (nombre, rondas, timer) | Hecho (`/setup`) | D |
 | Arte fondo encuentro en ruleta | Cableado CSS (`background-image: /ruleta-fondo.png`); PNG FEPE pendiente — fallback gris activo | F |

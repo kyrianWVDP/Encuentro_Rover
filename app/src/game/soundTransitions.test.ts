@@ -26,6 +26,15 @@ describe("soundsForTransition", () => {
     expect(soundsForTransition(prev, next)).toEqual(["spin"]);
   });
 
+  it("emits spin again on RESPIN → spinning", () => {
+    let s = turnReducer(initialGameState(), { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    const prev = s;
+    const next = turnReducer(s, { type: "RESPIN", rng: () => 0.9 });
+    expect(next.turn.phase).toBe("spinning");
+    expect(soundsForTransition(prev, next)).toEqual(["spin"]);
+  });
+
   it("emits correct on CONFIRM_JUDGE correct", () => {
     let s = initialGameState();
     s = turnReducer(s, { type: "SPIN", rng: rng0 });

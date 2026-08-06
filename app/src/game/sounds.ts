@@ -28,15 +28,13 @@ export function setMuted(muted: boolean): void {
   localStorage.setItem(MUTE_STORAGE_KEY, muted ? "1" : "0");
 }
 
-let unlocked = false;
-
 export function unlockAudio(): void {
-  unlocked = true;
   const url = soundUrl("spin");
   if (!url) return;
   try {
     const audio = new Audio(url);
     audio.volume = 0;
+    audio.muted = true;
     void audio.play().catch(() => {
       /* autoplay blocked until user gesture */
     });
@@ -59,6 +57,3 @@ export function playSound(event: SoundEvent): void {
   }
 }
 
-export function isAudioUnlocked(): boolean {
-  return unlocked;
-}
