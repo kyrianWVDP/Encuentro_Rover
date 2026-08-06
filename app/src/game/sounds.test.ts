@@ -47,7 +47,7 @@ describe("sounds", () => {
     const play = vi.fn().mockResolvedValue(undefined);
     const MockAudio = vi.fn(function (
       this: { volume: number; play: typeof play },
-      url: string,
+      _url: string,
     ) {
       this.volume = 1;
       this.play = play;

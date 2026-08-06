@@ -27,8 +27,8 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: #4a4a4a; /* Fallback for ruleta-fondo.png */
-  /* background-image: url('../assets/ruleta-fondo.png'); */
+  background-color: #4a4a4a; /* Fallback when ruleta-fondo.png is absent (404 OK until FEPE delivers art) */
+  background-image: url("/ruleta-fondo.png");
   background-size: cover;
   background-position: center;
   border: 6px solid #2c3e50;

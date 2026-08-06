@@ -92,6 +92,22 @@
 .clan-reveal-info {
   text-align: center;
   margin-top: 1rem;
+  animation: clan-pulse 1.2s ease-out;
+}
+
+@keyframes clan-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .clan-reveal-info h2 {

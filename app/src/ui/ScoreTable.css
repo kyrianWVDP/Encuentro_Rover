@@ -1,0 +1,12 @@
+tr.highlighted {
+  animation: score-flash 1s ease-out;
+}
+
+@keyframes score-flash {
+  0% {
+    filter: brightness(1.4);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import type { Clan } from "../game/types";
 import { ClanAvatar } from "./ClanAvatar";
+import "./ScoreTable.css";
 
 type ScoreTableProps = {
   scores: Record<string, number>;
