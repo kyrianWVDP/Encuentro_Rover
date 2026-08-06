@@ -1,0 +1,53 @@
+export type SoundEvent =
+  | "spin"
+  | "correct"
+  | "incorrect"
+  | "winner"
+  | "start"
+  | "timer10"
+  | "timerEnd";
+
+export const MUTE_STORAGE_KEY = "justas-mute-v1";
+
+const FILE_BY_EVENT: Partial<Record<SoundEvent, string>> = {
+  spin: "/sounds/spin.mp3",
+  correct: "/sounds/correct.mp3",
+  incorrect: "/sounds/incorrect.mp3",
+  winner: "/sounds/winner.mp3",
+};
+
+export function soundUrl(event: SoundEvent): string | null {
+  return FILE_BY_EVENT[event] ?? null;
+}
+
+export function isMuted(): boolean {
+  return localStorage.getItem(MUTE_STORAGE_KEY) === "1";
+}
+
+export function setMuted(muted: boolean): void {
+  localStorage.setItem(MUTE_STORAGE_KEY, muted ? "1" : "0");
+}
+
+let unlocked = false;
+
+export function unlockAudio(): void {
+  unlocked = true;
+}
+
+export function playSound(event: SoundEvent): void {
+  if (isMuted()) return;
+  const url = soundUrl(event);
+  if (!url) return;
+  try {
+    const audio = new Audio(url);
+    void audio.play().catch(() => {
+      /* autoplay blocked until unlock gesture */
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isAudioUnlocked(): boolean {
+  return unlocked;
+}
