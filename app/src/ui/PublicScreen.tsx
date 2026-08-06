@@ -9,6 +9,7 @@ import { TimerDisplay } from "./TimerDisplay";
 import { canShowAnswer } from "../game/selectors";
 import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
+import { FinalScreen } from "./FinalScreen";
 import "./PublicScreen.css";
 
 export function PublicScreen() {
@@ -24,15 +25,26 @@ export function PublicScreen() {
     return subscribeGameState(setGameState);
   }, []);
 
-  const { turn, round, scores, timer, rotationDeg, regularComplete } = gameState;
+  const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds } = gameState;
   const { phase, selectedClanId, selectedQuestionId } = turn;
+
+  const activeClans = useMemo(() => {
+    if (mode === "tiebreak" && tiebreakClanIds) {
+      return clans.filter(c => tiebreakClanIds.includes(c.id));
+    }
+    return clans;
+  }, [mode, tiebreakClanIds, clans]);
 
   const question = selectedQuestionId
     ? activeQuestions.find((q) => q.id === selectedQuestionId)
     : null;
 
   const renderContent = () => {
-    if (regularComplete) {
+    if (mode === "final") {
+      return <FinalScreen scores={scores} clans={clans} />;
+    }
+
+    if (regularComplete && mode === "regular") {
       return (
         <div className="public-content">
           <h1>Fin de la Fase Regular</h1>
@@ -46,7 +58,7 @@ export function PublicScreen() {
         return (
           <div className="public-content idle-layout">
             <RouletteWheel
-              clans={clans}
+              clans={activeClans}
               playedClanIds={round.playedClanIds}
               rotationDeg={rotationDeg}
               spinning={false}
@@ -66,7 +78,7 @@ export function PublicScreen() {
         return (
           <div className="public-content">
             <RouletteWheel
-              clans={clans}
+              clans={activeClans}
               playedClanIds={round.playedClanIds}
               rotationDeg={rotationDeg}
               spinning={phase === "spinning"}
@@ -128,6 +140,11 @@ export function PublicScreen() {
 
   return (
     <main className="public-screen">
+      {mode === "tiebreak" && (
+        <div className="tiebreak-banner public-banner">
+          <h1>MATA-MATA (Desempate)</h1>
+        </div>
+      )}
       {renderContent()}
       <div className="bottom-links">
         <Link to="/host" className="host-link-discrete">

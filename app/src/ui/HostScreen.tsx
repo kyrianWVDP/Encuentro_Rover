@@ -9,6 +9,7 @@ import { SPIN_DURATION_MS } from "../game/spin";
 import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
 import { ConfirmModal } from "./ConfirmModal";
+import { FinalScreen } from "./FinalScreen";
 import "./HostScreen.css";
 
 export function HostScreen() {
@@ -56,7 +57,7 @@ export function HostScreen() {
     }
   }, [state.timer?.running, state.timer?.endsAt, now]);
 
-  const { turn, round, scores, timer, regularComplete, error, pendingJudgement } = state;
+  const { turn, round, scores, timer, regularComplete, error, pendingJudgement, mode } = state;
   const { phase, selectedClanId, selectedQuestionId } = turn;
   const canSpin = clans.length >= 2;
   const selectedClan = selectedClanId
@@ -105,13 +106,27 @@ export function HostScreen() {
         </div>
       )}
 
-      {regularComplete ? (
+      {mode === "final" ? (
+        <FinalScreen scores={scores} clans={clans} />
+      ) : regularComplete && mode === "regular" ? (
         <div className="host-content">
           <h2>Fase regular terminada</h2>
           <ScoreTable scores={scores} clans={clans} />
+          <button
+            onClick={() => dispatch({ type: "BEGIN_FINALE" })}
+            className="download-btn"
+            style={{ marginTop: '2rem' }}
+          >
+            Continuar a resultado
+          </button>
         </div>
       ) : (
         <div className="host-content">
+          {mode === "tiebreak" && (
+            <div className="tiebreak-banner">
+              <h2>MATA-MATA (Desempate)</h2>
+            </div>
+          )}
           <div className="host-main-panel">
             <div className="status-panel">
               <h3>Estado: {phase}</h3>

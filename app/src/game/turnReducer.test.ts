@@ -198,7 +198,7 @@ describe("turnReducer", () => {
   });
 
   it("BEGIN_FINALE without ties goes to final", () => {
-    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) });
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) as any });
     let s = initialGameState(CLANS.slice(0, 3).map(c => c.id));
     s.regularComplete = true;
     s.scores = {
@@ -213,7 +213,7 @@ describe("turnReducer", () => {
   });
 
   it("BEGIN_FINALE with ties goes to tiebreak and filters active clans", () => {
-    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) });
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) as any });
     let s = initialGameState(CLANS.slice(0, 3).map(c => c.id));
     s.regularComplete = true;
     s.scores = {
