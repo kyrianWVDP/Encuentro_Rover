@@ -6,10 +6,10 @@ import {
   markClanPlayed,
 } from "./round";
 import { pickClan, targetWheelRotationDeg } from "./spin";
-import { applyJudgement, initialScores } from "./scoring";
+import { applyJudgement, initialScores, rankClans, nextTieGroup } from "./scoring";
 import { startTimer, stopTimer, restartTimer } from "./timer";
 import { loadEventConfig, getActiveQuestions, type EventConfig } from "./eventConfig";
-import type { Rng, RoundState, TurnState, Judgement, TimerState } from "./types";
+import type { Rng, RoundState, TurnState, Judgement, TimerState, GameMode } from "./types";
 
 export type Action =
   | { type: "SPIN"; rng?: Rng }
@@ -25,7 +25,8 @@ export type Action =
   | { type: "CONFIRM_JUDGE" }
   | { type: "ACK_REVEAL" }
   | { type: "ACK_SCORES" }
-  | { type: "NEXT_TURN" };
+  | { type: "NEXT_TURN" }
+  | { type: "BEGIN_FINALE" };
 
 export type GameState = {
   round: RoundState;
@@ -39,6 +40,8 @@ export type GameState = {
   maxRounds: number;
   timerSec: number;
   regularComplete: boolean;
+  mode: GameMode;
+  tiebreakClanIds: string[] | null;
 };
 
 export function initialGameState(clanIds: string[] = loadEventConfig().clans.map(c => c.id)): GameState {
@@ -62,6 +65,8 @@ export function initialGameState(clanIds: string[] = loadEventConfig().clans.map
     maxRounds: 10,
     timerSec: 60,
     regularComplete: false,
+    mode: "regular",
+    tiebreakClanIds: null,
   };
 }
 
@@ -73,15 +78,19 @@ export function initialGameStateFromConfig(config: EventConfig): GameState {
   };
 }
 
-function activeClans() {
-  return loadEventConfig().clans;
+function activeClans(state: GameState) {
+  let clans = loadEventConfig().clans;
+  if (state.mode === "tiebreak" && state.tiebreakClanIds) {
+    clans = clans.filter(c => state.tiebreakClanIds!.includes(c.id));
+  }
+  return clans;
 }
 
 function spinToClan(
   state: GameState,
   rng: Rng,
 ): GameState {
-  const clans = activeClans();
+  const clans = activeClans(state);
   const pending = getPendingClans(clans, state.round.playedClanIds);
   const clan = pickClan(pending, rng);
   const sectorDegrees = 360 / clans.length;
@@ -111,7 +120,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
     switch (action.type) {
       case "SPIN": {
         if (state.turn.phase !== "idle") return state;
-        if (state.regularComplete) return withError(state, "Juego terminado.");
+        if (state.regularComplete && state.mode !== "tiebreak") return withError(state, "Juego terminado.");
         return spinToClan(state, rng);
       }
 
@@ -225,14 +234,37 @@ export function turnReducer(state: GameState, action: Action): GameState {
           return state;
         }
         
-        const clans = activeClans();
+        const clans = activeClans(state);
         let round = markClanPlayed(state.round, state.turn.selectedClanId);
-        round = advanceRoundIfComplete(round, clans.length);
+        const newScores = applyJudgement(state.scores, state.turn.selectedClanId, state.pendingJudgement);
+        
+        let nextMode = state.mode;
+        let nextTiebreakClanIds = state.tiebreakClanIds;
+        
+        const isRoundComplete = round.playedClanIds.length >= clans.length;
+        if (isRoundComplete) {
+          round = advanceRoundIfComplete(round, clans.length);
+          
+          if (state.mode === "tiebreak") {
+            const allClans = loadEventConfig().clans;
+            const ranking = rankClans(newScores, allClans);
+            const nextGroup = nextTieGroup(ranking);
+            
+            if (!nextGroup) {
+              nextMode = "final";
+              nextTiebreakClanIds = null;
+            } else {
+              nextTiebreakClanIds = nextGroup;
+            }
+          }
+        }
         
         return {
           ...state,
           round,
-          scores: applyJudgement(state.scores, state.turn.selectedClanId, state.pendingJudgement),
+          scores: newScores,
+          mode: nextMode,
+          tiebreakClanIds: nextTiebreakClanIds,
           lastJudgement: state.pendingJudgement,
           pendingJudgement: null,
           turn: { ...state.turn, phase: "revealAnswer" },
@@ -254,7 +286,21 @@ export function turnReducer(state: GameState, action: Action): GameState {
             if (action.type !== "NEXT_TURN") return state;
         }
 
-        if (state.round.roundNumber > state.maxRounds) {
+        if (state.mode === "final") {
+          return {
+            ...state,
+            turn: {
+              ...state.turn,
+              phase: "final",
+              selectedClanId: null,
+              selectedQuestionId: null,
+            },
+            timer: null,
+            error: null,
+          };
+        }
+
+        if (state.mode === "regular" && state.round.roundNumber > state.maxRounds) {
           return {
             ...state,
             turn: {
@@ -279,6 +325,31 @@ export function turnReducer(state: GameState, action: Action): GameState {
           timer: null,
           error: null,
         };
+      }
+
+      case "BEGIN_FINALE": {
+        if (!state.regularComplete) return state;
+        
+        const allClans = loadEventConfig().clans;
+        const ranking = rankClans(state.scores, allClans);
+        const nextGroup = nextTieGroup(ranking);
+        
+        if (nextGroup) {
+          return {
+            ...state,
+            mode: "tiebreak",
+            tiebreakClanIds: nextGroup,
+          };
+        } else {
+          return {
+            ...state,
+            mode: "final",
+            turn: {
+              ...state.turn,
+              phase: "final",
+            }
+          };
+        }
       }
 
       default:

@@ -21,7 +21,10 @@ export type TurnPhase =
   | "questionRunning"
   | "awaitingJudgement"
   | "revealAnswer"
-  | "showScores";
+  | "showScores"
+  | "final";
+
+export type GameMode = "regular" | "tiebreak" | "final";
 
 export type TimerState = {
   running: boolean;

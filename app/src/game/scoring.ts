@@ -14,3 +14,40 @@ export function applyJudgement(
   const delta = judgement === "correct" ? POINTS_CORRECT : 0;
   return { ...scores, [clanId]: (scores[clanId] ?? 0) + delta };
 }
+
+export type RankedClan = {
+  clanId: string;
+  puntos: number;
+  puesto: number;
+};
+
+export function rankClans(scores: Record<string, number>, clans: { id: string }[]): RankedClan[] {
+  const sorted = clans
+    .map((c) => ({ clanId: c.id, puntos: scores[c.id] ?? 0 }))
+    .sort((a, b) => b.puntos - a.puntos);
+  
+  let puesto = 1;
+  return sorted.map((entry, index) => {
+    if (index > 0 && entry.puntos < sorted[index - 1].puntos) {
+      puesto = index + 1;
+    }
+    return { ...entry, puesto };
+  });
+}
+
+export function nextTieGroup(ranking: RankedClan[]): string[] | null {
+  const groups = new Map<number, string[]>();
+  for (const r of ranking) {
+    if (!groups.has(r.puesto)) {
+      groups.set(r.puesto, []);
+    }
+    groups.get(r.puesto)!.push(r.clanId);
+  }
+  
+  for (const group of groups.values()) {
+    if (group.length > 1) {
+      return group;
+    }
+  }
+  return null;
+}

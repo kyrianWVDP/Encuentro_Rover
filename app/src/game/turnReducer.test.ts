@@ -192,8 +192,77 @@ describe("turnReducer", () => {
     expect(s.regularComplete).toBe(true);
     expect(s.turn.phase).toBe("idle");
     
-    // SPIN not allowed when regularComplete? 
-    // Wait, the spec says "mínimo: no permitir SPIN y set error o turn.phase stay + regularComplete: true".
-    // I should check spinToClan guard.
+    // SPIN not allowed when regularComplete and mode != tiebreak
+    s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+    expect(s.error).toBe("Juego terminado.");
+  });
+
+  it("BEGIN_FINALE without ties goes to final", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) });
+    let s = initialGameState(CLANS.slice(0, 3).map(c => c.id));
+    s.regularComplete = true;
+    s.scores = {
+      [CLANS[0].id]: 30,
+      [CLANS[1].id]: 20,
+      [CLANS[2].id]: 10,
+    };
+    s = turnReducer(s, { type: "BEGIN_FINALE" });
+    expect(s.mode).toBe("final");
+    expect(s.turn.phase).toBe("final");
+    expect(s.tiebreakClanIds).toBeNull();
+  });
+
+  it("BEGIN_FINALE with ties goes to tiebreak and filters active clans", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) });
+    let s = initialGameState(CLANS.slice(0, 3).map(c => c.id));
+    s.regularComplete = true;
+    s.scores = {
+      [CLANS[0].id]: 30,
+      [CLANS[1].id]: 30,
+      [CLANS[2].id]: 10,
+    };
+    s = turnReducer(s, { type: "BEGIN_FINALE" });
+    expect(s.mode).toBe("tiebreak");
+    expect(s.tiebreakClanIds).toEqual([CLANS[0].id, CLANS[1].id]);
+
+    // Spin in tiebreak should only select from the tied clans
+    s = turnReducer(s, { type: "SPIN", rng: rng0 });
+    expect(s.turn.selectedClanId).toBe(CLANS[0].id);
+    expect(s.error).toBeNull();
+
+    // Let's resolve the tie
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    
+    // Still tiebreak mode, since not all clans in tiebreak group played yet
+    expect(s.mode).toBe("tiebreak");
+    
+    // Check that usedQuestionIds grows properly in tiebreak
+    expect(s.round.usedQuestionIds.length).toBe(1);
+
+    // Second clan plays
+    s = turnReducer(s, { type: "ACK_REVEAL" });
+    s = turnReducer(s, { type: "ACK_SCORES" });
+    s = turnReducer(s, { type: "SPIN", rng: () => 0.99 }); // will pick clan 1
+    expect(s.turn.selectedClanId).toBe(CLANS[1].id);
+
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    expect(s.round.usedQuestionIds.length).toBe(2);
+    
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+
+    // Tie is now broken (clan 0 has 40, clan 1 has 30), so mode should be final since no other ties exist
+    expect(s.mode).toBe("final");
+    expect(s.tiebreakClanIds).toBeNull();
+    
+    // Acknowledge reveal and scores, should end up in 'final' phase
+    s = turnReducer(s, { type: "ACK_REVEAL" });
+    s = turnReducer(s, { type: "ACK_SCORES" });
+    
+    expect(s.turn.phase).toBe("final");
   });
 });
