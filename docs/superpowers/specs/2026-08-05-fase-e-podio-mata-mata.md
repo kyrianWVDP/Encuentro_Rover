@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-05  
 **Proyecto:** Justas del Saber — Encuentro Rover 2026  
-**Estado:** Aprobado (2026-08-05)  
+**Estado:** Implementado — Fase E (2026-08-05)  
 **Stack:** React + Vite + TypeScript (`app/`)  
 **Depende de:** Fases C–D  
 **Fuente:** cuestionario Emilio Agüero
@@ -81,11 +81,11 @@ tiebreakClanIds: string[] | null;
 
 ## 8. Criterio de hecho
 
-- [ ] Tras 10 rondas, entra tiebreak o final según scores  
-- [ ] Mata-mata solo entre empatados; preguntas nuevas  
-- [ ] Podio 1–2–3 + tabla  
-- [ ] Descargar CSV usable en Excel  
-- [ ] Tests E en verde  
+- [x] Tras 10 rondas, entra tiebreak o final según scores  
+- [x] Mata-mata solo entre empatados; preguntas nuevas  
+- [x] Podio 1–2–3 + tabla  
+- [x] Descargar CSV usable en Excel  
+- [x] Tests E en verde  
 
 ## 9. Fuera de alcance
 

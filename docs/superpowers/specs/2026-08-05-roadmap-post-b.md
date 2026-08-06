@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-05  
 **Fuente de verdad de producto:** cuestionario Emilio Agüero (completo)  
-**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`; **Fase D** — setup del evento (`/setup`), CRUD clanes, config, import preguntas  
+**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`; **Fase D** — setup del evento (`/setup`), CRUD clanes, config, import preguntas; **Fase E** — podio, mata-mata automático, export CSV  
 **App:** `app/` (React + Vite + TypeScript)
 
 ## 1. Mapa Emilio → estado
@@ -20,15 +20,16 @@
 | Respuesta oficial **después** de juzgar (no antes al público) | Hecho | C |
 | Panel host (ve respuesta) ≠ pantalla pública (pregunta + timer) | Hecho (`/` + `/host`) | C |
 | Tabla de posiciones tras cada turno | Hecho | C |
-| Podio 1–2–3 + clasificación final | Pendiente | E |
-| Empate → mata-mata con preguntas nuevas | Pendiente | E |
+| Podio 1–2–3 + clasificación final | Hecho | E |
+| Empate → mata-mata con preguntas nuevas | Hecho | E |
 | Sonidos (ruleta, 10 s, fin, acierto, error) | Pendiente | F |
 | Animaciones clan / ruleta / tabla | Parcial (ruleta) | F |
 | Offline-first + guardado automático | Pendiente | G |
 | Pausa general | Pendiente | G |
 | CRUD clanes + logos + representantes editables | Hecho | D |
 | Cargar banco preguntas | Hecho (embebido + import CSV/JSON en `/setup`) | D |
-| Export PDF/Excel resultados | Pendiente | E |
+| Export CSV resultados (Excel) | Hecho | E |
+| Export PDF resultados | Pendiente | F |
 | Reiniciar competencia / reutilizar evento | Hecho (reiniciar partida; config intacta) | D |
 | Config sin código (nombre, rondas, timer) | Hecho (`/setup`) | D |
 | Arte fondo encuentro en ruleta | Pendiente (fallback sólido) | F |
@@ -61,10 +62,12 @@ Cada fase = **spec** (`docs/superpowers/specs/`) → **plan** (`docs/superpowers
 
 **Spec:** `2026-08-05-fase-d-setup-event.md` — 54 tests en verde.
 
-### Fase E — Cierre y desempate
+### Fase E — Cierre y desempate ✅ **Implementado**
 - Pantalla final: podio + tabla completa
 - Mata-mata entre empatados (preguntas nuevas, sin repetir)
-- Export resultados PDF y/o Excel
+- Export CSV resultados (Excel)
+
+**Spec:** `2026-08-05-fase-e-podio-mata-mata.md` — 68 tests en verde.
 
 ### Fase F — Show (Kahoot / Rover)
 - Sonidos definitivos
@@ -96,7 +99,8 @@ C bloquea el ensayo útil. D puede avanzar en paralelo de contenido (logos). G p
 
 ## 5. Próximo entregable de diseño
 
-**Spec Fase E** — podio, mata-mata y export de resultados.
+**Spec Fase F** — sonidos, animaciones y pulido visual proyector.
 
 Fase C cerrada (2026-08-05): spec + plan + SDD + implementación + criterios §10 verificados.  
-Fase D cerrada (2026-08-05): spec + SDD + implementación + criterios §9 verificados.
+Fase D cerrada (2026-08-05): spec + SDD + implementación + criterios §9 verificados.  
+Fase E cerrada (2026-08-05): spec + SDD + implementación + criterios §8 verificados.
