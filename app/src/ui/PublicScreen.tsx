@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { loadGameState, subscribeGameState } from "../game/sync";
 import { initialGameState } from "../game/turnReducer";
@@ -10,6 +10,8 @@ import { canShowAnswer } from "../game/selectors";
 import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
+import { useGameSounds } from "./useGameSounds";
+import { unlockAudio } from "../game/sounds";
 import "./PublicScreen.css";
 
 export function PublicScreen() {
@@ -24,6 +26,15 @@ export function PublicScreen() {
   useEffect(() => {
     return subscribeGameState(setGameState);
   }, []);
+
+  useGameSounds(gameState);
+
+  const unlockedRef = useRef(false);
+  const handleFirstInteraction = () => {
+    if (unlockedRef.current) return;
+    unlockedRef.current = true;
+    unlockAudio();
+  };
 
   const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds } = gameState;
   const { phase, selectedClanId, selectedQuestionId } = turn;
@@ -139,7 +150,7 @@ export function PublicScreen() {
   };
 
   return (
-    <main className="public-screen">
+    <main className="public-screen" onClick={handleFirstInteraction}>
       {mode === "tiebreak" && (
         <div className="tiebreak-banner public-banner">
           <h1>MATA-MATA (Desempate)</h1>

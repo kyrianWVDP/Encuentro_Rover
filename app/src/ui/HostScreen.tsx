@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { turnReducer, initialGameState } from "../game/turnReducer";
 import type { Action, GameState } from "../game/turnReducer";
@@ -10,14 +10,29 @@ import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
 import { ConfirmModal } from "./ConfirmModal";
 import { FinalScreen } from "./FinalScreen";
+import { isMuted, setMuted, unlockAudio } from "../game/sounds";
 import "./HostScreen.css";
 
 export function HostScreen() {
   const [state, setState] = useState<GameState>(() => loadGameState() ?? initialGameState());
   const [now, setNow] = useState(Date.now());
+  const [muted, setMutedState] = useState(() => isMuted());
   const config = useMemo(() => loadEventConfig(), []);
   const clans = config.clans;
   const activeQuestions = useMemo(() => getActiveQuestions(config, QUESTIONS), [config]);
+
+  const unlockedRef = useRef(false);
+  const handleFirstInteraction = () => {
+    if (unlockedRef.current) return;
+    unlockedRef.current = true;
+    unlockAudio();
+  };
+
+  const handleToggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    setMutedState(next);
+  };
 
   const dispatch = (action: Action) => {
     setState((prev) => {
@@ -84,7 +99,7 @@ export function HostScreen() {
   };
 
   return (
-    <main className="host-screen">
+    <main className="host-screen" onClick={handleFirstInteraction}>
       <header className="host-header">
         <div className="header-left">
           <h1>Panel de Control (Host)</h1>
@@ -94,6 +109,9 @@ export function HostScreen() {
           <Link to="/setup" className="public-link" style={{ marginLeft: '1rem' }}>
             Setup
           </Link>
+          <button type="button" className="mute-toggle-btn" onClick={handleToggleMute}>
+            {muted ? "Activar sonidos" : "Silenciar sonidos"}
+          </button>
         </div>
         <div className="header-right">
           <h2>Ronda {round.roundNumber}</h2>
