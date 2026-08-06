@@ -22,7 +22,7 @@
 | Tabla de posiciones tras cada turno | Hecho | C |
 | Podio 1–2–3 + clasificación final | Hecho | E |
 | Empate → mata-mata con preguntas nuevas | Hecho | E |
-| Sonidos (ruleta, 10 s, fin, acierto, error) | Pendiente | F |
+| Sonidos (ruleta, 10 s, fin, acierto, error) | Spec F (4 MP3; stubs 10s/fin/inicio) | F |
 | Animaciones clan / ruleta / tabla | Parcial (ruleta) | F |
 | Offline-first + guardado automático | Pendiente | G |
 | Pausa general | Pendiente | G |
@@ -70,9 +70,11 @@ Cada fase = **spec** (`docs/superpowers/specs/`) → **plan** (`docs/superpowers
 **Spec:** `2026-08-05-fase-e-podio-mata-mata.md` — 68 tests en verde.
 
 ### Fase F — Show (Kahoot / Rover)
-- Sonidos definitivos
-- Animación anuncio de clan + actualización de tabla
-- Cablear `ruleta-fondo.png` (arte FEPE)
+**Spec:** `2026-08-06-fase-f-show-sonidos.md` (diseño aprobado; pendiente plan + impl.)
+- Sonidos: spin / correct / incorrect / winner (stubs: start, timer10, timerEnd)
+- Motor central en proyector + mute host
+- Animación anuncio de clan + highlight tabla
+- Cablear `ruleta-fondo.png` si existe (arte FEPE)
 - Pulido visual proyector
 
 ### Fase G — Robustez evento
@@ -97,9 +99,9 @@ C bloquea el ensayo útil. D puede avanzar en paralelo de contenido (logos). G p
 - Offline prioritario  
 - Justa = actividad del encuentro (no “otra arma secreta” en el sistema)
 
-## 5. Próximo entregable de diseño
+## 5. Próximo entregable
 
-**Spec Fase F** — sonidos, animaciones y pulido visual proyector.
+**Plan + implementación Fase F** — `2026-08-06-fase-f-show-sonidos.md`.
 
 Fase C cerrada (2026-08-05): spec + plan + SDD + implementación + criterios §10 verificados.  
 Fase D cerrada (2026-08-05): spec + SDD + implementación + criterios §9 verificados.  
