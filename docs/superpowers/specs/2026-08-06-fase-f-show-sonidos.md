@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-06  
 **Proyecto:** Justas del Saber — Encuentro Rover 2026  
-**Estado:** Diseño aprobado — pendiente plan + implementación  
+**Estado:** Implementado  
 **Stack:** React + Vite + TypeScript (`app/`)  
 **Depende de:** Fases C–E  
 **Fuente:** cuestionario Emilio Agüero + links YouTube / MP3 locales
@@ -100,14 +100,14 @@ No disparar en re-renders sin cambio de fase. Re-giro (`RESPIN` → `spinning`) 
 
 ## 8. Criterio de hecho
 
-- [ ] Los 4 MP3 viven en `app/public/sounds/` con nombres estables
-- [ ] Giro / acierto / error / ganador final suenan en el proyector en el momento correcto
-- [ ] Sin doble audio host+público
-- [ ] Stubs Inicio/10s/fin no rompen
-- [ ] Mute en host silencia el proyector
-- [ ] Anuncio de clan + highlight de fila visibles
-- [ ] Fondo ruleta cableado **si** hay PNG; si no, fallback OK
-- [ ] Tests F en verde
+- [x] Los 4 MP3 viven en `app/public/sounds/` con nombres estables
+- [x] Giro / acierto / error / ganador final suenan en el proyector en el momento correcto
+- [x] Sin doble audio host+público
+- [x] Stubs Inicio/10s/fin no rompen
+- [x] Mute en host silencia el proyector
+- [x] Anuncio de clan + highlight de fila visibles
+- [x] Fondo ruleta cableado **si** hay PNG; si no, fallback OK (`ruleta-fondo.png` aún no en repo; CSS + fallback gris activos)
+- [x] Tests F en verde
 
 ## 9. Fuera de alcance
 

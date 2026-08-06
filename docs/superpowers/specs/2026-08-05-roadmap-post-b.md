@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-08-05  
 **Fuente de verdad de producto:** cuestionario Emilio Agüero (completo)  
-**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`; **Fase D** — setup del evento (`/setup`), CRUD clanes, config, import preguntas; **Fase E** — podio, mata-mata automático, export CSV  
+**Hecho:** alcance B — ruleta de clanes + pregunta al azar + revelar respuesta (parcial); **Fase C** — juicio, timer, panel host, sync `/` + `/host`; **Fase D** — setup del evento (`/setup`), CRUD clanes, config, import preguntas; **Fase E** — podio, mata-mata automático, export CSV; **Fase F** — sonidos, mute, animaciones, ruleta CSS  
 **App:** `app/` (React + Vite + TypeScript)
 
 ## 1. Mapa Emilio → estado
@@ -22,8 +22,8 @@
 | Tabla de posiciones tras cada turno | Hecho | C |
 | Podio 1–2–3 + clasificación final | Hecho | E |
 | Empate → mata-mata con preguntas nuevas | Hecho | E |
-| Sonidos (ruleta, 10 s, fin, acierto, error) | Spec F (4 MP3; stubs 10s/fin/inicio) | F |
-| Animaciones clan / ruleta / tabla | Parcial (ruleta) | F |
+| Sonidos (ruleta, 10 s, fin, acierto, error) | Hecho (4 MP3: spin/correct/incorrect/winner); stubs `start`/`timer10`/`timerEnd` sin MP3 aún | F |
+| Animaciones clan / ruleta / tabla | Hecho (anuncio clan + highlight fila en `showScores`) | F |
 | Offline-first + guardado automático | Pendiente | G |
 | Pausa general | Pendiente | G |
 | CRUD clanes + logos + representantes editables | Hecho | D |
@@ -32,7 +32,7 @@
 | Export PDF resultados | Pendiente | F |
 | Reiniciar competencia / reutilizar evento | Hecho (reiniciar partida; config intacta) | D |
 | Config sin código (nombre, rondas, timer) | Hecho (`/setup`) | D |
-| Arte fondo encuentro en ruleta | Pendiente (fallback sólido) | F |
+| Arte fondo encuentro en ruleta | Cableado CSS (`background-image: /ruleta-fondo.png`); PNG FEPE pendiente — fallback gris activo | F |
 | Título Encuentro Rover 2026 / Justas del Saber | Hecho | — |
 
 ## 2. Fases de planificación / implementación
@@ -69,12 +69,12 @@ Cada fase = **spec** (`docs/superpowers/specs/`) → **plan** (`docs/superpowers
 
 **Spec:** `2026-08-05-fase-e-podio-mata-mata.md` — 68 tests en verde.
 
-### Fase F — Show (Kahoot / Rover)
-**Spec:** `2026-08-06-fase-f-show-sonidos.md` (diseño aprobado; pendiente plan + impl.)
-- Sonidos: spin / correct / incorrect / winner (stubs: start, timer10, timerEnd)
-- Motor central en proyector + mute host
-- Animación anuncio de clan + highlight tabla
-- Cablear `ruleta-fondo.png` si existe (arte FEPE)
+### Fase F — Show (Kahoot / Rover) ✅ **Implementado**
+**Spec:** `2026-08-06-fase-f-show-sonidos.md` — criterios §8 verificados.
+- Sonidos: spin / correct / incorrect / winner en `app/public/sounds/` (stubs `start`/`timer10`/`timerEnd` sin MP3)
+- Motor central `playSound` en proyector + mute host (`justas-mute-v1`)
+- Animación anuncio de clan + highlight fila en tabla
+- `ruleta-fondo.png` cableado en CSS; PNG no en repo — fallback gris
 - Pulido visual proyector
 
 ### Fase G — Robustez evento
@@ -101,8 +101,9 @@ C bloquea el ensayo útil. D puede avanzar en paralelo de contenido (logos). G p
 
 ## 5. Próximo entregable
 
-**Plan + implementación Fase F** — `2026-08-06-fase-f-show-sonidos.md`.
+**Plan + implementación Fase G** — offline-first, autoguardado, pausa general.
 
 Fase C cerrada (2026-08-05): spec + plan + SDD + implementación + criterios §10 verificados.  
 Fase D cerrada (2026-08-05): spec + SDD + implementación + criterios §9 verificados.  
-Fase E cerrada (2026-08-05): spec + SDD + implementación + criterios §8 verificados.
+Fase E cerrada (2026-08-05): spec + SDD + implementación + criterios §8 verificados.  
+Fase F cerrada (2026-08-06): spec + plan + SDD + implementación + criterios §8 verificados.
