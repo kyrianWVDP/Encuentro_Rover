@@ -68,7 +68,7 @@ export function FinalScreen({ scores, clans }: FinalScreenProps) {
       </div>
 
       <div className="final-score-table">
-        <ScoreTable scores={scores} clans={clans} />
+        <ScoreTable scores={scores} clans={clans} topN={3} />
       </div>
     </div>
   );

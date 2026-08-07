@@ -10,6 +10,7 @@ import { canShowAnswer } from "../game/selectors";
 import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
+import { ClanAvatar } from "./ClanAvatar";
 import { useGameSounds } from "./useGameSounds";
 import { unlockAudio } from "../game/sounds";
 import "./PublicScreen.css";
@@ -60,8 +61,8 @@ export function PublicScreen() {
     if (regularComplete && mode === "regular") {
       return (
         <div className="public-content">
-          <h1>Fin de la Fase Regular</h1>
-          <ScoreTable scores={scores} clans={clans} />
+          <h1 className="public-end-title">Fin de la Fase Regular</h1>
+          <ScoreTable scores={scores} clans={clans} topN={3} />
         </div>
       );
     }
@@ -69,7 +70,7 @@ export function PublicScreen() {
     switch (phase) {
       case "idle":
         return (
-          <div className="public-content idle-layout">
+          <div className="public-content">
             <RouletteWheel
               clans={activeClans}
               playedClanIds={round.playedClanIds}
@@ -77,51 +78,81 @@ export function PublicScreen() {
               spinning={false}
               selectedClanId={null}
             />
-            <div className="idle-scores">
-              <ScoreTable scores={scores} clans={clans} />
-            </div>
           </div>
         );
 
       case "spinning":
-      case "clanRevealed": {
-        const selectedClan = selectedClanId
-          ? clans.find((c) => c.id === selectedClanId)
-          : null;
         return (
           <div className="public-content">
             <RouletteWheel
               clans={activeClans}
               playedClanIds={round.playedClanIds}
               rotationDeg={rotationDeg}
-              spinning={phase === "spinning"}
+              spinning
               selectedClanId={selectedClanId}
             />
-            {phase === "clanRevealed" && selectedClan && (
-              <div className="clan-reveal-info">
-                <h2>{selectedClan.nombre}</h2>
-                {selectedClan.representante && (
-                  <p className="clan-representante">{selectedClan.representante}</p>
-                )}
-              </div>
-            )}
+          </div>
+        );
+
+      case "clanRevealed": {
+        const selectedClan = selectedClanId
+          ? clans.find((c) => c.id === selectedClanId)
+          : null;
+        if (!selectedClan) return null;
+        return (
+          <div className="public-content clan-reveal-layout">
+            <div className="clan-reveal-hero">
+              <ClanAvatar
+                nombre={selectedClan.nombre}
+                logoUrl={selectedClan.logoUrl}
+                color={selectedClan.color}
+                size={160}
+              />
+              <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
+              {selectedClan.representante && (
+                <p className="clan-representante">{selectedClan.representante}</p>
+              )}
+            </div>
           </div>
         );
       }
 
       case "questionRunning":
       case "awaitingJudgement":
-      case "revealAnswer":
+      case "revealAnswer": {
+        const selectedClan = selectedClanId
+          ? clans.find((c) => c.id === selectedClanId)
+          : null;
         return (
           <div className="public-content question-layout">
-            {question && (
-              <div className="question-card">
-                <h2 className="question-text">{question.texto}</h2>
-                {canShowAnswer(phase) && (
-                  <div className="answer-text">
-                    <strong>Respuesta oficial:</strong> {question.respuestaCorrecta}
-                  </div>
+            {selectedClan && (
+              <div className="clan-question-header">
+                <ClanAvatar
+                  nombre={selectedClan.nombre}
+                  logoUrl={selectedClan.logoUrl}
+                  color={selectedClan.color}
+                  size={88}
+                />
+                <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
+                {selectedClan.representante && (
+                  <p className="clan-representante">{selectedClan.representante}</p>
                 )}
+              </div>
+            )}
+            {question && (
+              <div className="question-scroll">
+                <div className="question-scroll-roller question-scroll-roller-top" aria-hidden />
+                <div className="question-card">
+                  <p className="question-label">Pregunta</p>
+                  <h2 className="question-text">{question.texto}</h2>
+                  {canShowAnswer(phase) && (
+                    <div className="answer-block">
+                      <p className="answer-label">Respuesta oficial</p>
+                      <p className="answer-text">{question.respuestaCorrecta}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="question-scroll-roller question-scroll-roller-bottom" aria-hidden />
               </div>
             )}
             {timer && phase !== "revealAnswer" && (
@@ -134,6 +165,7 @@ export function PublicScreen() {
             )}
           </div>
         );
+      }
 
       case "showScores":
         return (
@@ -153,6 +185,10 @@ export function PublicScreen() {
 
   return (
     <main className="public-screen" onClick={handleFirstInteraction}>
+      <header className="public-title-block">
+        <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
+        <h1 className="public-title">{config.titulo}</h1>
+      </header>
       {!audioReady && (
         <p className="audio-unlock-hint">Tocá la pantalla para activar el sonido</p>
       )}

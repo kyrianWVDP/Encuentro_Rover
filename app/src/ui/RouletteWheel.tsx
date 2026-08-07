@@ -45,23 +45,17 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
                 transform: `rotate(${i * sectorDegrees}deg) translateY(-110px)`,
               }}
             >
-              <div className="roulette-label" style={{ 
-                transform: `rotate(${-i * sectorDegrees}deg)`,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
+              <div
+                className="roulette-label"
+                style={{ transform: `rotate(${-i * sectorDegrees}deg)` }}
+                title={clan.nombre}
+              >
                 <ClanAvatar
                   nombre={clan.nombre}
                   logoUrl={clan.logoUrl}
                   color={clan.color}
-                  size={32}
+                  size={48}
                 />
-                <span>{clan.nombre}</span>
-                {clan.representante && (
-                  <span className="clan-representante">{clan.representante}</span>
-                )}
               </div>
             </div>
           );

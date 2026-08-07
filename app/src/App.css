@@ -33,7 +33,7 @@
   position: relative;
 }
 
-.question-card {
+.turn-screen .question-card {
   margin-top: 3rem;
   padding: 2rem;
   background: #fff;
@@ -43,21 +43,21 @@
   width: 100%;
 }
 
-.question-text {
+.turn-screen .question-text {
   font-size: 2.5rem;
   line-height: 1.4;
   color: #2c3e50;
   margin: 0;
 }
 
-.answer-block {
+.turn-screen .answer-block {
   margin-top: 1.75rem;
   padding-top: 1.5rem;
   border-top: 2px solid #e8eef2;
   text-align: left;
 }
 
-.answer-label {
+.turn-screen .answer-label {
   margin: 0 0 0.5rem;
   font-size: 1rem;
   letter-spacing: 0.04em;
@@ -66,7 +66,7 @@
   font-weight: 600;
 }
 
-.answer-text {
+.turn-screen .answer-text {
   margin: 0;
   font-size: 2rem;
   line-height: 1.35;
@@ -101,47 +101,11 @@
   transform: scale(0.98);
 }
 
-/* --- ScoreTable --- */
+/* --- ScoreTable (legacy base; scroll skin lives in ScoreTable.css) --- */
 .score-table-container {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-
-.score-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.score-table th,
-.score-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.score-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #2c3e50;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-}
-
-.score-table tr:last-child td {
-  border-bottom: none;
-}
-
-.score-table tr {
-  transition: background-color 0.3s ease;
-}
-
-.score-table tr.highlighted {
-  background-color: #f1f8ff;
 }
 
 .clan-cell {
@@ -155,12 +119,6 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-.score-cell {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: #2c3e50;
 }
 
 /* --- ConfirmModal --- */

@@ -10,8 +10,20 @@ import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
 import { ConfirmModal } from "./ConfirmModal";
 import { FinalScreen } from "./FinalScreen";
+import { ClanAvatar } from "./ClanAvatar";
 import { isMuted, setMuted, unlockAudio } from "../game/sounds";
 import "./HostScreen.css";
+
+const PHASE_LABELS: Record<string, string> = {
+  idle: "Listo para girar",
+  spinning: "Girando…",
+  clanRevealed: "Clan elegido",
+  questionRunning: "Pregunta en curso",
+  awaitingJudgement: "Esperando juicio",
+  revealAnswer: "Revelar respuesta",
+  showScores: "Tabla de puntajes",
+  final: "Final",
+};
 
 export function HostScreen() {
   const [state, setState] = useState<GameState>(() => loadGameState() ?? initialGameState());
@@ -102,19 +114,29 @@ export function HostScreen() {
     <main className="host-screen" onClick={handleFirstInteraction}>
       <header className="host-header">
         <div className="header-left">
-          <h1>Panel de Control (Host)</h1>
-          <Link to="/" target="_blank" className="public-link">
-            Abrir Proyector
-          </Link>
-          <Link to="/setup" className="public-link" style={{ marginLeft: '1rem' }}>
-            Setup
-          </Link>
-          <button type="button" className="mute-toggle-btn" onClick={handleToggleMute}>
-            {muted ? "Activar sonidos" : "Silenciar sonidos"}
-          </button>
+          <div className="header-brand">
+            <p className="eyebrow">Encuentro Rover 2026</p>
+            <h1>Panel Host · Justas del Saber</h1>
+          </div>
+          <div className="header-actions">
+            <Link to="/" target="_blank" className="public-link">
+              Abrir Proyector
+            </Link>
+            <Link to="/setup" className="public-link">
+              Setup
+            </Link>
+            <button
+              type="button"
+              className={`mute-toggle-btn${muted ? " is-muted" : ""}`}
+              onClick={handleToggleMute}
+            >
+              {muted ? "Activar sonidos" : "Silenciar sonidos"}
+            </button>
+          </div>
         </div>
         <div className="header-right">
-          <h2>Ronda {round.roundNumber}</h2>
+          <p className="round-label">Ronda</p>
+          <h2>{round.roundNumber}</h2>
         </div>
       </header>
 
@@ -128,15 +150,16 @@ export function HostScreen() {
         <FinalScreen scores={scores} clans={clans} />
       ) : regularComplete && mode === "regular" ? (
         <div className="host-content">
-          <h2>Fase regular terminada</h2>
-          <ScoreTable scores={scores} clans={clans} />
-          <button
-            onClick={() => dispatch({ type: "BEGIN_FINALE" })}
-            className="download-btn"
-            style={{ marginTop: '2rem' }}
-          >
-            Continuar a resultado
-          </button>
+          <div className="host-finale-panel">
+            <h2>Fase regular terminada</h2>
+            <ScoreTable scores={scores} clans={clans} topN={3} />
+            <button
+              onClick={() => dispatch({ type: "BEGIN_FINALE" })}
+              className="download-btn"
+            >
+              Continuar a resultado
+            </button>
+          </div>
         </div>
       ) : (
         <div className="host-content">
@@ -147,15 +170,29 @@ export function HostScreen() {
           )}
           <div className="host-main-panel">
             <div className="status-panel">
-              <h3>Estado: {phase}</h3>
+              <h3>
+                Estado
+                <span className="phase-pill">
+                  {PHASE_LABELS[phase] ?? phase}
+                </span>
+              </h3>
               {selectedClan && (
                 <div className="selected-clan-info">
-                  <p>
-                    <strong>Clan seleccionado:</strong> {selectedClan.nombre}
-                  </p>
-                  {selectedClan.representante && (
-                    <p className="clan-representante">{selectedClan.representante}</p>
-                  )}
+                  <ClanAvatar
+                    nombre={selectedClan.nombre}
+                    logoUrl={selectedClan.logoUrl}
+                    color={selectedClan.color}
+                    size={52}
+                  />
+                  <div className="selected-clan-copy">
+                    <p>
+                      <strong>Clan seleccionado</strong>
+                    </p>
+                    <p className="selected-clan-name">{selectedClan.nombre}</p>
+                    {selectedClan.representante && (
+                      <p className="clan-representante">{selectedClan.representante}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -246,7 +283,6 @@ export function HostScreen() {
           </div>
 
           <aside className="host-sidebar">
-            <h3>Puntajes</h3>
             <ScoreTable scores={scores} clans={clans} highlightClanId={selectedClanId} />
           </aside>
         </div>
