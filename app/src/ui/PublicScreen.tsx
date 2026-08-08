@@ -108,8 +108,7 @@ export function PublicScreen() {
                 nombre={selectedClan.nombre}
                 logoUrl={selectedClan.logoUrl}
                 color={selectedClan.color}
-                fit="contain"
-                className="clan-avatar--hero"
+                size={160}
               />
               <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
               {selectedClan.representante && (
@@ -134,8 +133,7 @@ export function PublicScreen() {
                   nombre={selectedClan.nombre}
                   logoUrl={selectedClan.logoUrl}
                   color={selectedClan.color}
-                  size={96}
-                  fit="contain"
+                  size={88}
                 />
                 <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
                 {selectedClan.representante && (
