@@ -16,6 +16,9 @@ export function soundsForTransition(
     if (next.lastJudgement === "correct") out.push("correct");
     if (next.lastJudgement === "incorrect") out.push("incorrect");
   }
+  if (prev.turn.phase !== "showScores" && next.turn.phase === "showScores") {
+    out.push("scores");
+  }
   if (prev.mode !== "final" && next.mode === "final") {
     out.push("winner");
   }

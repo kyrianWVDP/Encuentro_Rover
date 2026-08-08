@@ -39,7 +39,7 @@ export function PublicScreen() {
     setAudioReady(true);
   };
 
-  const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds } = gameState;
+  const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds, lastJudgement } = gameState;
   const { phase, selectedClanId, selectedQuestionId } = turn;
 
   const activeClans = useMemo(() => {
@@ -62,7 +62,7 @@ export function PublicScreen() {
       return (
         <div className="public-content">
           <h1 className="public-end-title">Fin de la Fase Regular</h1>
-          <ScoreTable scores={scores} clans={clans} topN={3} />
+          <ScoreTable scores={scores} clans={clans} topN={3} size="projector" />
         </div>
       );
     }
@@ -77,6 +77,7 @@ export function PublicScreen() {
               rotationDeg={rotationDeg}
               spinning={false}
               selectedClanId={null}
+              size="projector"
             />
           </div>
         );
@@ -90,6 +91,7 @@ export function PublicScreen() {
               rotationDeg={rotationDeg}
               spinning
               selectedClanId={selectedClanId}
+              size="projector"
             />
           </div>
         );
@@ -174,6 +176,9 @@ export function PublicScreen() {
               scores={scores}
               clans={clans}
               highlightClanId={selectedClanId}
+              size="projector"
+              animate
+              lastJudgement={lastJudgement}
             />
           </div>
         );

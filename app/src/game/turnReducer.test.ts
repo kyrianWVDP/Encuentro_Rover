@@ -152,11 +152,44 @@ describe("turnReducer", () => {
       s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
       s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
       s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+      const isLastOfRound = i === 7;
+      expect(s.roundScoresPending).toBe(isLastOfRound);
       s = turnReducer(s, { type: "ACK_REVEAL" });
-      s = turnReducer(s, { type: "ACK_SCORES" });
+      if (isLastOfRound) {
+        expect(s.turn.phase).toBe("showScores");
+        s = turnReducer(s, { type: "ACK_SCORES" });
+      } else {
+        expect(s.turn.phase).toBe("idle");
+      }
     }
     expect(s.round.roundNumber).toBe(2);
     expect(s.round.playedClanIds).toEqual([]);
+  });
+
+  it("skips score table mid-round and shows it only when the round completes", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 2) as any });
+    let s = initialGameState(CLANS.slice(0, 2).map((c) => c.id));
+
+    s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    expect(s.roundScoresPending).toBe(false);
+    s = turnReducer(s, { type: "ACK_REVEAL" });
+    expect(s.turn.phase).toBe("idle");
+
+    s = turnReducer(s, { type: "SPIN", rng: () => 0.99 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+    expect(s.roundScoresPending).toBe(true);
+    s = turnReducer(s, { type: "ACK_REVEAL" });
+    expect(s.turn.phase).toBe("showScores");
+    s = turnReducer(s, { type: "ACK_SCORES" });
+    expect(s.turn.phase).toBe("idle");
+    expect(s.roundScoresPending).toBe(false);
   });
 
   it("successive spins produce a rotation delta >= SPIN_EXTRA_TURNS * 360 - small tolerance", () => {

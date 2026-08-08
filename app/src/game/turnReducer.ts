@@ -42,6 +42,8 @@ export type GameState = {
   regularComplete: boolean;
   mode: GameMode;
   tiebreakClanIds: string[] | null;
+  /** True after the last clan of a round is judged — public shows score table. */
+  roundScoresPending: boolean;
 };
 
 export function initialGameState(clanIds: string[] = loadEventConfig().clans.map(c => c.id)): GameState {
@@ -67,6 +69,7 @@ export function initialGameState(clanIds: string[] = loadEventConfig().clans.map
     regularComplete: false,
     mode: "regular",
     tiebreakClanIds: null,
+    roundScoresPending: false,
   };
 }
 
@@ -109,6 +112,52 @@ function spinToClan(
 
 function withError(state: GameState, message: string): GameState {
   return { ...state, error: message };
+}
+
+/** Clear the current turn after reveal/scores and prepare the next spin. */
+function proceedAfterTurn(state: GameState): GameState {
+  if (state.mode === "final") {
+    return {
+      ...state,
+      roundScoresPending: false,
+      turn: {
+        ...state.turn,
+        phase: "final",
+        selectedClanId: null,
+        selectedQuestionId: null,
+      },
+      timer: null,
+      error: null,
+    };
+  }
+
+  if (state.mode === "regular" && state.round.roundNumber > state.maxRounds) {
+    return {
+      ...state,
+      roundScoresPending: false,
+      turn: {
+        ...state.turn,
+        phase: "idle",
+        selectedClanId: null,
+        selectedQuestionId: null,
+      },
+      regularComplete: true,
+      timer: null,
+      error: null,
+    };
+  }
+
+  return {
+    ...state,
+    roundScoresPending: false,
+    turn: {
+      phase: "idle",
+      selectedClanId: null,
+      selectedQuestionId: null,
+    },
+    timer: null,
+    error: null,
+  };
 }
 
 export function turnReducer(state: GameState, action: Action): GameState {
@@ -267,64 +316,30 @@ export function turnReducer(state: GameState, action: Action): GameState {
           tiebreakClanIds: nextTiebreakClanIds,
           lastJudgement: state.pendingJudgement,
           pendingJudgement: null,
+          roundScoresPending: isRoundComplete,
           turn: { ...state.turn, phase: "revealAnswer" },
         };
       }
 
       case "ACK_REVEAL": {
         if (state.turn.phase !== "revealAnswer") return state;
-        return {
-          ...state,
-          turn: { ...state.turn, phase: "showScores" },
-        };
+        // Score table only after every clan has played this round.
+        if (state.roundScoresPending) {
+          return {
+            ...state,
+            turn: { ...state.turn, phase: "showScores" },
+          };
+        }
+        return proceedAfterTurn(state);
       }
 
       case "ACK_SCORES":
       case "NEXT_TURN": {
         if (state.turn.phase !== "showScores" && state.turn.phase !== "questionRunning") {
-            // For backward compatibility NEXT_TURN allowed from questionRunning
-            if (action.type !== "NEXT_TURN") return state;
+          // For backward compatibility NEXT_TURN allowed from questionRunning
+          if (action.type !== "NEXT_TURN") return state;
         }
-
-        if (state.mode === "final") {
-          return {
-            ...state,
-            turn: {
-              ...state.turn,
-              phase: "final",
-              selectedClanId: null,
-              selectedQuestionId: null,
-            },
-            timer: null,
-            error: null,
-          };
-        }
-
-        if (state.mode === "regular" && state.round.roundNumber > state.maxRounds) {
-          return {
-            ...state,
-            turn: {
-              ...state.turn,
-              phase: "idle",
-              selectedClanId: null,
-              selectedQuestionId: null,
-            },
-            regularComplete: true,
-            timer: null,
-            error: null,
-          };
-        }
-
-        return {
-          ...state,
-          turn: {
-            phase: "idle",
-            selectedClanId: null,
-            selectedQuestionId: null,
-          },
-          timer: null,
-          error: null,
-        };
+        return proceedAfterTurn(state);
       }
 
       case "BEGIN_FINALE": {

@@ -92,3 +92,23 @@
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.25);
 }
+
+.roulette-container--projector {
+  width: 500px;
+  height: 500px;
+  margin: 1.5rem auto;
+}
+
+.roulette-container--projector .roulette-pointer {
+  border-left-width: 20px;
+  border-right-width: 20px;
+  border-top-width: 40px;
+  top: -28px;
+}
+
+.roulette-container--projector .roulette-sector {
+  width: 96px;
+  height: 96px;
+  margin-top: -48px;
+  margin-left: -48px;
+}

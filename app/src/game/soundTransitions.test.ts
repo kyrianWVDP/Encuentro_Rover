@@ -59,6 +59,27 @@ describe("soundsForTransition", () => {
     expect(soundsForTransition(prev, next)).toEqual(["incorrect"]);
   });
 
+  it("emits scores when entering showScores after a full round", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 2) as any });
+    let s = initialGameState(CLANS.slice(0, 2).map((c) => c.id));
+    for (let i = 0; i < 2; i++) {
+      s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+      s = turnReducer(s, { type: "SPIN_FINISHED" });
+      s = turnReducer(s, { type: "START_QUESTION", nowMs: 0 });
+      s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+      s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+      if (i === 0) {
+        s = turnReducer(s, { type: "ACK_REVEAL" });
+        expect(s.turn.phase).toBe("idle");
+      }
+    }
+    const prev = s;
+    expect(prev.roundScoresPending).toBe(true);
+    const next = turnReducer(s, { type: "ACK_REVEAL" });
+    expect(next.turn.phase).toBe("showScores");
+    expect(soundsForTransition(prev, next)).toEqual(["scores"]);
+  });
+
   it("emits winner when mode becomes final", () => {
     saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) as any });
     let s = initialGameState(CLANS.slice(0, 3).map((c) => c.id));

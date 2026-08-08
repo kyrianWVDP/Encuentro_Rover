@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { Clan } from "../game/types";
+import { POINTS_CORRECT } from "../game/scoring";
 import { ClanAvatar } from "./ClanAvatar";
 import "./ScoreTable.css";
 
@@ -9,13 +10,122 @@ type ScoreTableProps = {
   highlightClanId?: string | null;
   /** If set, only the top N clans by score are shown. */
   topN?: number;
+  /** Larger parchment for projector / public screen. */
+  size?: "default" | "projector";
+  /** When true (projector showScores), cascade + count-up. */
+  animate?: boolean;
+  lastJudgement?: "correct" | "incorrect" | null;
 };
+
+function useAnimatedScore(
+  clanId: string,
+  target: number,
+  enabled: boolean,
+  from: number,
+): number {
+  const [value, setValue] = useState(enabled ? from : target);
+  useEffect(() => {
+    if (!enabled || from === target) {
+      setValue(target);
+      return;
+    }
+    const start = performance.now();
+    const duration = 1000;
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - (1 - t) * (1 - t);
+      setValue(Math.round(from + (target - from) * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [clanId, target, enabled, from]);
+  return value;
+}
+
+type ScoreRowProps = {
+  clan: Clan;
+  index: number;
+  target: number;
+  animate: boolean;
+  isHighlighted: boolean;
+  highlightClanId?: string | null;
+  lastJudgement?: "correct" | "incorrect" | null;
+  avatarSize: number;
+};
+
+function ScoreRow({
+  clan,
+  index,
+  target,
+  animate,
+  isHighlighted,
+  highlightClanId,
+  lastJudgement,
+  avatarSize,
+}: ScoreRowProps) {
+  const shouldCount =
+    animate &&
+    clan.id === highlightClanId &&
+    lastJudgement === "correct";
+  const from = shouldCount ? Math.max(0, target - POINTS_CORRECT) : target;
+  const displayScore = useAnimatedScore(clan.id, target, shouldCount, from);
+
+  return (
+    <tr
+      className={isHighlighted ? "highlighted" : ""}
+      style={{
+        ...(animate ? { animationDelay: `${index * 80}ms` } : undefined),
+        ...(isHighlighted && clan.color
+          ? { backgroundColor: `${clan.color}33` }
+          : undefined),
+      }}
+    >
+      <td>
+        <div className="clan-cell">
+          <ClanAvatar
+            nombre={clan.nombre}
+            logoUrl={clan.logoUrl}
+            color={clan.color}
+            size={avatarSize}
+          />
+          <div className="clan-text">
+            <span
+              className={`clan-name${isHighlighted ? " is-highlighted" : ""}`}
+              style={
+                isHighlighted && clan.color
+                  ? { color: clan.color }
+                  : undefined
+              }
+            >
+              {clan.nombre}
+            </span>
+            {clan.representante && (
+              <span className="clan-representante">
+                {clan.representante}
+              </span>
+            )}
+          </div>
+        </div>
+      </td>
+      <td
+        className={`score-cell${shouldCount ? " is-counting" : ""}`}
+      >
+        {displayScore}
+      </td>
+    </tr>
+  );
+}
 
 export const ScoreTable: React.FC<ScoreTableProps> = ({
   scores,
   clans,
   highlightClanId,
   topN,
+  size = "default",
+  animate = false,
+  lastJudgement,
 }) => {
   const sortedClans = [...clans].sort((a, b) => {
     const scoreA = scores[a.id] || 0;
@@ -26,9 +136,17 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
     typeof topN === "number" && topN > 0
       ? sortedClans.slice(0, topN)
       : sortedClans;
+  const avatarSize = size === "projector" ? 40 : 28;
+  const scrollClass = [
+    "score-scroll",
+    size === "projector" ? "score-scroll--projector" : "",
+    animate ? "score-scroll--animate" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className="score-scroll">
+    <div className={scrollClass}>
       <div className="score-scroll-roller score-scroll-roller-top" aria-hidden />
       <div className="score-table-container">
         <h3 className="score-scroll-title">
@@ -42,49 +160,19 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {visibleClans.map((clan) => {
-              const isHighlighted = clan.id === highlightClanId;
-              return (
-                <tr
-                  key={clan.id}
-                  className={isHighlighted ? "highlighted" : ""}
-                  style={
-                    isHighlighted && clan.color
-                      ? { backgroundColor: `${clan.color}33` }
-                      : undefined
-                  }
-                >
-                  <td>
-                    <div className="clan-cell">
-                      <ClanAvatar
-                        nombre={clan.nombre}
-                        logoUrl={clan.logoUrl}
-                        color={clan.color}
-                        size={28}
-                      />
-                      <div className="clan-text">
-                        <span
-                          className={`clan-name${isHighlighted ? " is-highlighted" : ""}`}
-                          style={
-                            isHighlighted && clan.color
-                              ? { color: clan.color }
-                              : undefined
-                          }
-                        >
-                          {clan.nombre}
-                        </span>
-                        {clan.representante && (
-                          <span className="clan-representante">
-                            {clan.representante}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="score-cell">{scores[clan.id] || 0}</td>
-                </tr>
-              );
-            })}
+            {visibleClans.map((clan, index) => (
+              <ScoreRow
+                key={clan.id}
+                clan={clan}
+                index={index}
+                target={scores[clan.id] || 0}
+                animate={animate}
+                isHighlighted={clan.id === highlightClanId}
+                highlightClanId={highlightClanId}
+                lastJudgement={lastJudgement}
+                avatarSize={avatarSize}
+              />
+            ))}
           </tbody>
         </table>
       </div>

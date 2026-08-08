@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { ScoreTable } from "./ScoreTable";
 import { ClanAvatar } from "./ClanAvatar";
+import { ConfettiBurst } from "./ConfettiBurst";
 import { rankClans } from "../game/scoring";
 import { buildResultsCsv, downloadTextFile } from "../game/exportCsv";
 import type { Clan } from "../game/types";
@@ -54,6 +55,7 @@ export function FinalScreen({ scores, clans }: FinalScreenProps) {
 
   return (
     <div className="final-screen">
+      <ConfettiBurst />
       <h1>¡Resultados Finales!</h1>
       <div className="podium-container">
         {renderPodiumPlace(top2, 2)}
@@ -68,7 +70,7 @@ export function FinalScreen({ scores, clans }: FinalScreenProps) {
       </div>
 
       <div className="final-score-table">
-        <ScoreTable scores={scores} clans={clans} topN={3} />
+        <ScoreTable scores={scores} clans={clans} topN={3} size="projector" />
       </div>
     </div>
   );

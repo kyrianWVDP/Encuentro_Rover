@@ -176,3 +176,78 @@
     filter: brightness(1);
   }
 }
+
+/* Projector / public screen — larger parchment for distance viewing */
+.score-scroll--projector {
+  max-width: min(780px, 88vw);
+}
+
+.score-scroll--projector .score-scroll-roller {
+  height: 26px;
+}
+
+.score-scroll--projector .score-scroll-roller::before,
+.score-scroll--projector .score-scroll-roller::after {
+  width: 20px;
+  height: 20px;
+}
+
+.score-scroll--projector .score-table-container {
+  padding: 1.6rem 1.85rem 1.75rem;
+}
+
+.score-scroll--projector .score-scroll-title {
+  margin-bottom: 1rem;
+  font-size: clamp(1.9rem, 3.2vw, 2.45rem);
+}
+
+.score-scroll--projector .score-table th,
+.score-scroll--projector .score-table td {
+  padding: 0.85rem 0.7rem;
+}
+
+.score-scroll--projector .score-table th {
+  font-size: 0.9rem;
+}
+
+.score-scroll--projector .clan-cell {
+  gap: 0.85rem;
+}
+
+.score-scroll--projector .clan-name {
+  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+}
+
+.score-scroll--projector .clan-representante {
+  font-size: 0.85rem;
+}
+
+.score-scroll--projector .score-cell {
+  font-size: clamp(1.3rem, 2.1vw, 1.7rem);
+  width: 6.5rem;
+}
+
+.score-scroll--animate .score-table tbody tr {
+  opacity: 0;
+  animation: score-row-in 0.45s ease-out forwards;
+}
+
+.score-scroll--animate .score-table tbody tr.highlighted {
+  animation: score-row-in 0.45s ease-out forwards, score-flash 1s ease-out;
+}
+
+@keyframes score-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.score-scroll--animate .score-cell.is-counting {
+  color: #a86410;
+  filter: brightness(1.15);
+}

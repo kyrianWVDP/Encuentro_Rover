@@ -41,7 +41,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
   }, [running, endsAt, remainingMs]);
 
   const seconds = Math.ceil(displayMs / 1000);
-  const isWarning = seconds <= 10 && seconds > 0;
+  const isWarning = seconds <= 9 && seconds > 0;
   const isDanger = seconds === 0;
 
   let timerClass = "timer-display";

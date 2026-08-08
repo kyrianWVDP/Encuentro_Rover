@@ -34,9 +34,9 @@
   inset: 0;
   background: linear-gradient(
     160deg,
-    rgba(12, 14, 18, 0.82) 0%,
-    rgba(18, 22, 28, 0.78) 45%,
-    rgba(10, 12, 16, 0.88) 100%
+    rgba(12, 14, 18, 0.55) 0%,
+    rgba(18, 22, 28, 0.52) 45%,
+    rgba(10, 12, 16, 0.60) 100%
   );
   pointer-events: none;
   z-index: 0;

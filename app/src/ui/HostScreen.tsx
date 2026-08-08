@@ -274,7 +274,9 @@ export function HostScreen() {
                 </>
               )}
               {phase === "revealAnswer" && (
-                <button onClick={() => dispatch({ type: "ACK_REVEAL" })}>Continuar</button>
+                <button onClick={() => dispatch({ type: "ACK_REVEAL" })}>
+                  {state.roundScoresPending ? "Ver puntajes" : "Siguiente turno"}
+                </button>
               )}
               {phase === "showScores" && (
                 <button onClick={() => dispatch({ type: "ACK_SCORES" })}>Siguiente turno</button>

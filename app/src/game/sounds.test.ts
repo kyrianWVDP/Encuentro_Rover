@@ -39,8 +39,9 @@ describe("sounds", () => {
     expect(soundUrl("correct")).toBe("/sounds/correct.mp3");
     expect(soundUrl("incorrect")).toBe("/sounds/incorrect.mp3");
     expect(soundUrl("winner")).toBe("/sounds/winner.mp3");
+    expect(soundUrl("scores")).toBe("/sounds/scores.mp3");
+    expect(soundUrl("timer10")).toBe("/sounds/timer9.mp3");
     expect(soundUrl("start")).toBeNull();
-    expect(soundUrl("timer10")).toBeNull();
     expect(soundUrl("timerEnd")).toBeNull();
   });
 

@@ -3,6 +3,7 @@ export type SoundEvent =
   | "correct"
   | "incorrect"
   | "winner"
+  | "scores"
   | "start"
   | "timer10"
   | "timerEnd";
@@ -14,6 +15,8 @@ const FILE_BY_EVENT: Partial<Record<SoundEvent, string>> = {
   correct: "/sounds/correct.mp3",
   incorrect: "/sounds/incorrect.mp3",
   winner: "/sounds/winner.mp3",
+  scores: "/sounds/scores.mp3",
+  timer10: "/sounds/timer9.mp3",
 };
 
 export function soundUrl(event: SoundEvent): string | null {
@@ -57,3 +60,29 @@ export function playSound(event: SoundEvent): void {
   }
 }
 
+let timerWarningAudio: HTMLAudioElement | null = null;
+
+/** Looping clock for the last seconds of the question timer. */
+export function startTimerWarning(): void {
+  if (isMuted()) return;
+  if (timerWarningAudio) return;
+  const url = soundUrl("timer10");
+  if (!url) return;
+  try {
+    const audio = new Audio(url);
+    audio.loop = true;
+    timerWarningAudio = audio;
+    void audio.play().catch(() => {
+      timerWarningAudio = null;
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+export function stopTimerWarning(): void {
+  if (!timerWarningAudio) return;
+  timerWarningAudio.pause();
+  timerWarningAudio.currentTime = 0;
+  timerWarningAudio = null;
+}

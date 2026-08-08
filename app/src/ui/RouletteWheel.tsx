@@ -11,6 +11,7 @@ type RouletteWheelProps = {
   spinning: boolean;
   selectedClanId: string | null;
   durationMs?: number;
+  size?: "default" | "projector";
 };
 
 export const RouletteWheel: React.FC<RouletteWheelProps> = ({
@@ -20,11 +21,15 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
   spinning,
   selectedClanId,
   durationMs = SPIN_DURATION_MS,
+  size = "default",
 }) => {
   const sectorDegrees = 360 / clans.length;
+  const isProjector = size === "projector";
+  const logoSize = isProjector ? 72 : 48;
+  const translateY = isProjector ? -175 : -110;
 
   return (
-    <div className="roulette-container">
+    <div className={`roulette-container${isProjector ? " roulette-container--projector" : ""}`}>
       <div className="roulette-pointer"></div>
       <div
         className="roulette-wheel"
@@ -42,7 +47,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
               key={clan.id}
               className={`roulette-sector ${isPlayed ? 'played' : ''} ${isSelected ? 'selected' : ''}`}
               style={{
-                transform: `rotate(${i * sectorDegrees}deg) translateY(-110px)`,
+                transform: `rotate(${i * sectorDegrees}deg) translateY(${translateY}px)`,
               }}
             >
               <div
@@ -54,7 +59,7 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
                   nombre={clan.nombre}
                   logoUrl={clan.logoUrl}
                   color={clan.color}
-                  size={48}
+                  size={logoSize}
                 />
               </div>
             </div>
