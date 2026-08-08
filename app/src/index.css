@@ -50,20 +50,34 @@
   }
 }
 
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: #0c0e12;
+}
+
 #root {
   width: 100%;
   max-width: none;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   text-align: center;
   border: none;
-  min-height: 100svh;
+  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  background: #0c0e12;
 }
 
 body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  background: #0c0e12;
 }
 
 h1,

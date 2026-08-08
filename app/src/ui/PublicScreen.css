@@ -1,18 +1,23 @@
 .public-screen {
-  width: 100vw;
-  height: 100vh;
+  /* Edge-to-edge on the projector (incl. browser fullscreen / F11) */
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #1a1a1a;
+  background-color: #0c0e12;
   background-image: var(--asset-encuentro-fondo);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: #ffffff;
   overflow: hidden;
-  position: relative;
+  box-sizing: border-box;
 }
 
 .public-screen--final {
@@ -85,7 +90,9 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  padding: 5.5rem 2rem 2rem;
+  margin: 0;
+  padding: 5rem 1rem 1.25rem;
+  box-sizing: border-box;
 }
 
 .idle-layout {
