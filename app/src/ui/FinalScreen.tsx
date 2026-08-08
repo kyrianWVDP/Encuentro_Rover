@@ -10,9 +10,15 @@ import "./FinalScreen.css";
 type FinalScreenProps = {
   scores: Record<string, number>;
   clans: Clan[];
+  /** Host can export CSV; projector should hide the control. */
+  showDownloadCsv?: boolean;
 };
 
-export function FinalScreen({ scores, clans }: FinalScreenProps) {
+export function FinalScreen({
+  scores,
+  clans,
+  showDownloadCsv = true,
+}: FinalScreenProps) {
   const ranking = useMemo(() => rankClans(scores, clans), [scores, clans]);
   
   const top1 = ranking.filter(r => r.puesto === 1).map(r => clans.find(c => c.id === r.clanId)!);
@@ -34,15 +40,25 @@ export function FinalScreen({ scores, clans }: FinalScreenProps) {
     downloadTextFile("resultados-encuentro-rover.csv", csv);
   };
 
+  const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
   const renderPodiumPlace = (placeClans: Clan[], position: number) => {
     if (!placeClans.length) return null;
     return (
       <div className={`podium-place place-${position}`}>
+        <div className="podium-medal" aria-hidden>
+          {medals[position]}
+        </div>
         <div className="podium-avatars">
-          {placeClans.map(clan => (
+          {placeClans.map((clan) => (
             <div key={clan.id} className="podium-clan">
-              <ClanAvatar nombre={clan.nombre} logoUrl={clan.logoUrl} color={clan.color} size={position === 1 ? 80 : 60} />
-              <div className="podium-clan-name" style={{ color: clan.color || 'inherit' }}>{clan.nombre}</div>
+              <ClanAvatar
+                nombre={clan.nombre}
+                logoUrl={clan.logoUrl}
+                color={clan.color}
+                size={position === 1 ? 96 : 72}
+              />
+              <div className="podium-clan-name">{clan.nombre}</div>
             </div>
           ))}
         </div>
@@ -63,11 +79,13 @@ export function FinalScreen({ scores, clans }: FinalScreenProps) {
         {renderPodiumPlace(top3, 3)}
       </div>
       
-      <div className="final-actions">
-        <button onClick={handleDownloadCsv} className="download-btn">
-          Descargar CSV
-        </button>
-      </div>
+      {showDownloadCsv && (
+        <div className="final-actions">
+          <button onClick={handleDownloadCsv} className="download-btn">
+            Descargar CSV
+          </button>
+        </div>
+      )}
 
       <div className="final-score-table">
         <ScoreTable scores={scores} clans={clans} topN={3} size="projector" />

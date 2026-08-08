@@ -3,9 +3,11 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: min(960px, 96vw);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem 2rem;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .final-screen h1 {
@@ -13,7 +15,7 @@
   font-size: clamp(2.2rem, 5vw, 3.25rem);
   color: #f1c40f;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
-  margin-bottom: 2rem;
+  margin: 0 0 1.25rem;
   text-transform: uppercase;
 }
 
@@ -21,10 +23,11 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 0.75rem;
-  min-height: 340px;
-  margin-bottom: 2rem;
+  gap: 0.5rem;
+  min-height: 380px;
+  margin-bottom: 1.5rem;
   width: 100%;
+  padding: 0 0.5rem;
 }
 
 .podium-place {
@@ -32,7 +35,8 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
-  max-width: 200px;
+  max-width: 240px;
+  min-width: 0;
 }
 
 .podium-avatars {
@@ -40,65 +44,97 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .podium-clan {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .podium-clan-name {
-  font-weight: bold;
+  font-family: "UnifrakturCook", "Cinzel Decorative", serif;
+  font-weight: 700;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  line-height: 1.15;
   color: #f4f1ea;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  max-width: 11rem;
+}
+
+.podium-medal {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  margin-bottom: 0.35rem;
 }
 
 .podium-step {
+  position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 1rem;
-  border-radius: 6px 6px 0 0;
+  padding-top: 0.85rem;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-bottom: none;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -8px 16px rgba(0, 0, 0, 0.25),
-    0 8px 20px rgba(0, 0, 0, 0.35);
-  animation: podium-rise 0.7s ease-out both;
+    inset 0 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -14px 22px rgba(0, 0, 0, 0.28),
+    0 12px 28px rgba(0, 0, 0, 0.45);
+  animation: podium-rise 0.75s ease-out both;
+  transform-style: preserve-3d;
+}
+
+/* Olympic-style side face */
+.podium-step::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -18px;
+  height: 18px;
+  border-radius: 0 0 6px 6px;
+  background: inherit;
+  filter: brightness(0.72);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
 }
 
 .place-1 .podium-step {
-  height: 200px;
-  background: linear-gradient(180deg, #ffe566 0%, #f1c40f 40%, #c9970a 100%);
+  height: 220px;
+  background: linear-gradient(180deg, #fff1a0 0%, #f1c40f 38%, #c9970a 100%);
+  z-index: 2;
 }
 
 .place-2 .podium-step {
-  height: 140px;
-  background: linear-gradient(180deg, #f5f7fa 0%, #c0c6ce 45%, #8e959e 100%);
-  animation-delay: 0.1s;
+  height: 155px;
+  background: linear-gradient(180deg, #ffffff 0%, #d5dbe3 42%, #8e959e 100%);
+  animation-delay: 0.12s;
+  z-index: 1;
 }
 
 .place-3 .podium-step {
-  height: 100px;
-  background: linear-gradient(180deg, #e8a06a 0%, #cd7f32 45%, #a05a20 100%);
-  animation-delay: 0.2s;
+  height: 110px;
+  background: linear-gradient(180deg, #f0b07a 0%, #cd7f32 42%, #8a4e18 100%);
+  animation-delay: 0.22s;
+  z-index: 1;
 }
 
 .podium-number {
   font-family: "Cinzel", serif;
-  font-size: 3rem;
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(0, 0, 0, 0.42);
+  letter-spacing: 0.04em;
 }
 
 @keyframes podium-rise {
   from {
-    transform: translateY(40px);
+    transform: translateY(48px);
     opacity: 0;
   }
   to {
@@ -108,24 +144,25 @@
 }
 
 .final-actions {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .download-btn {
-  background-color: #2ecc71;
+  background: linear-gradient(180deg, #4fd87d 0%, #2ecc71 100%);
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  font-weight: bold;
+  padding: 0.9rem 1.75rem;
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+  font-weight: 700;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s, filter 0.2s;
 }
 
 .download-btn:hover {
-  background-color: #27ae60;
+  filter: brightness(1.08);
   transform: translateY(-2px);
 }
 
@@ -134,5 +171,13 @@
 }
 
 .final-score-table {
-  width: 100%;
+  display: none;
+}
+
+@media (min-height: 900px) {
+  .final-score-table {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
 }

@@ -55,7 +55,7 @@ export function PublicScreen() {
 
   const renderContent = () => {
     if (mode === "final") {
-      return <FinalScreen scores={scores} clans={clans} />;
+      return <FinalScreen scores={scores} clans={clans} showDownloadCsv={false} />;
     }
 
     if (regularComplete && mode === "regular") {
@@ -189,7 +189,10 @@ export function PublicScreen() {
   };
 
   return (
-    <main className="public-screen" onClick={handleFirstInteraction}>
+    <main
+      className={`public-screen${mode === "final" ? " public-screen--final" : ""}`}
+      onClick={handleFirstInteraction}
+    >
       <header className="public-title-block">
         <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
         <h1 className="public-title">{config.titulo}</h1>

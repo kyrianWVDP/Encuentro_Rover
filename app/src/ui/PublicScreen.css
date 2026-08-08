@@ -15,6 +15,20 @@
   position: relative;
 }
 
+.public-screen--final {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.public-screen--final .public-title-block {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 1rem auto 0.5rem;
+}
+
 .public-screen::before {
   content: "";
   position: absolute;
