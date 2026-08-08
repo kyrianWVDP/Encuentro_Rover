@@ -20,7 +20,7 @@
   color: var(--host-text);
   font-family: var(--host-body);
   background-color: var(--host-bg);
-  background-image: url("/encuentro-fondo.jpg");
+  background-image: var(--asset-encuentro-fondo);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

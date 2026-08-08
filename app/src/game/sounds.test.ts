@@ -8,6 +8,7 @@ import {
   unlockAudio,
   MUTE_STORAGE_KEY,
 } from "./sounds";
+import { assetUrl } from "./assetUrl";
 
 function stubMockAudio() {
   const play = vi.fn().mockResolvedValue(undefined);
@@ -35,12 +36,12 @@ describe("sounds", () => {
   });
 
   it("soundUrl maps known events and stubs", () => {
-    expect(soundUrl("spin")).toBe("/sounds/spin.mp3");
-    expect(soundUrl("correct")).toBe("/sounds/correct.mp3");
-    expect(soundUrl("incorrect")).toBe("/sounds/incorrect.mp3");
-    expect(soundUrl("winner")).toBe("/sounds/winner.mp3");
-    expect(soundUrl("scores")).toBe("/sounds/scores.mp3");
-    expect(soundUrl("timer10")).toBe("/sounds/timer9.mp3");
+    expect(soundUrl("spin")).toBe(assetUrl("/sounds/spin.mp3"));
+    expect(soundUrl("correct")).toBe(assetUrl("/sounds/correct.mp3"));
+    expect(soundUrl("incorrect")).toBe(assetUrl("/sounds/incorrect.mp3"));
+    expect(soundUrl("winner")).toBe(assetUrl("/sounds/winner.mp3"));
+    expect(soundUrl("scores")).toBe(assetUrl("/sounds/scores.mp3"));
+    expect(soundUrl("timer10")).toBe(assetUrl("/sounds/timer9.mp3"));
     expect(soundUrl("start")).toBeNull();
     expect(soundUrl("timerEnd")).toBeNull();
   });
@@ -72,7 +73,7 @@ describe("sounds", () => {
 
     unlockAudio();
 
-    expect(MockAudio).toHaveBeenCalledWith("/sounds/spin.mp3");
+    expect(MockAudio).toHaveBeenCalledWith(assetUrl("/sounds/spin.mp3"));
     expect(MockAudio.mock.instances[0].volume).toBe(0);
     expect(MockAudio.mock.instances[0].muted).toBe(true);
     expect(play).toHaveBeenCalled();

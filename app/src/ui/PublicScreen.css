@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   background-color: #1a1a1a;
-  background-image: url("/encuentro-fondo.jpg");
+  background-image: var(--asset-encuentro-fondo);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -1,3 +1,5 @@
+import { assetUrl } from "./assetUrl";
+
 export type SoundEvent =
   | "spin"
   | "correct"
@@ -20,7 +22,8 @@ const FILE_BY_EVENT: Partial<Record<SoundEvent, string>> = {
 };
 
 export function soundUrl(event: SoundEvent): string | null {
-  return FILE_BY_EVENT[event] ?? null;
+  const path = FILE_BY_EVENT[event];
+  return path ? assetUrl(path) : null;
 }
 
 export function isMuted(): boolean {

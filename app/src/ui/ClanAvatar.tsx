@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { clanInitials } from '../game/clanDisplay';
+import { assetUrlOrNull } from '../game/assetUrl';
 
 type ClanAvatarProps = {
   nombre: string;
@@ -15,8 +16,9 @@ export const ClanAvatar: React.FC<ClanAvatarProps> = ({
   size = 40,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const resolvedLogo = assetUrlOrNull(logoUrl);
 
-  const showImage = logoUrl && !imgError;
+  const showImage = resolvedLogo && !imgError;
 
   return (
     <div
@@ -39,7 +41,7 @@ export const ClanAvatar: React.FC<ClanAvatarProps> = ({
     >
       {showImage ? (
         <img
-          src={logoUrl}
+          src={resolvedLogo}
           alt={`Logo ${nombre}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           onError={() => setImgError(true)}
