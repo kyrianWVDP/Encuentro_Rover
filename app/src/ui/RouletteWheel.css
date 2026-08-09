@@ -2,7 +2,7 @@
   position: relative;
   width: 320px;
   height: 320px;
-  margin: 2rem auto;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,7 +96,7 @@
 .roulette-container--projector {
   width: 500px;
   height: 500px;
-  margin: 1.5rem auto;
+  margin: 0 auto;
 }
 
 .roulette-container--projector .roulette-pointer {
