@@ -118,6 +118,19 @@
   box-sizing: border-box;
 }
 
+/* Scoreboard must clear the absolute page title and fit 8 rows on one screen */
+.scores-layout {
+  justify-content: center;
+  padding: 6.75rem 1rem 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.scores-layout .score-scroll {
+  flex-shrink: 1;
+  min-height: 0;
+}
+
 .question-layout {
   gap: 1.75rem;
   justify-content: flex-start;

@@ -136,7 +136,7 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
     typeof topN === "number" && topN > 0
       ? sortedClans.slice(0, topN)
       : sortedClans;
-  const avatarSize = size === "projector" ? 40 : 28;
+  const avatarSize = size === "projector" ? 32 : 28;
   const scrollClass = [
     "score-scroll",
     size === "projector" ? "score-scroll--projector" : "",

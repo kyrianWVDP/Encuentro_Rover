@@ -60,7 +60,7 @@ export function PublicScreen() {
 
     if (regularComplete && mode === "regular") {
       return (
-        <div className="public-content">
+        <div className="public-content scores-layout">
           <h1 className="public-end-title">Fin de la Fase Regular</h1>
           <ScoreTable scores={scores} clans={clans} topN={3} size="projector" />
         </div>
@@ -171,7 +171,7 @@ export function PublicScreen() {
 
       case "showScores":
         return (
-          <div className="public-content">
+          <div className="public-content scores-layout">
             <ScoreTable
               scores={scores}
               clans={clans}
