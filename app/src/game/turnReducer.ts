@@ -47,6 +47,7 @@ export type GameState = {
 };
 
 export function initialGameState(clanIds: string[] = loadEventConfig().clans.map(c => c.id)): GameState {
+  const config = loadEventConfig();
   return {
     round: {
       roundNumber: 1,
@@ -64,8 +65,8 @@ export function initialGameState(clanIds: string[] = loadEventConfig().clans.map
     timer: null,
     lastJudgement: null,
     pendingJudgement: null,
-    maxRounds: 10,
-    timerSec: 60,
+    maxRounds: config.maxRounds,
+    timerSec: config.timerSec,
     regularComplete: false,
     mode: "regular",
     tiebreakClanIds: null,
@@ -114,6 +115,38 @@ function withError(state: GameState, message: string): GameState {
   return { ...state, error: message };
 }
 
+/** Enter tiebreak or final podium after the regular phase ends. */
+function beginFinale(state: GameState): GameState {
+  const allClans = loadEventConfig().clans;
+  const ranking = rankClans(state.scores, allClans);
+  const nextGroup = nextTieGroup(ranking);
+
+  if (nextGroup) {
+    return {
+      ...state,
+      mode: "tiebreak",
+      tiebreakClanIds: nextGroup,
+      turn: {
+        phase: "idle",
+        selectedClanId: null,
+        selectedQuestionId: null,
+      },
+    };
+  }
+
+  return {
+    ...state,
+    mode: "final",
+    tiebreakClanIds: null,
+    turn: {
+      ...state.turn,
+      phase: "final",
+      selectedClanId: null,
+      selectedQuestionId: null,
+    },
+  };
+}
+
 /** Clear the current turn after reveal/scores and prepare the next spin. */
 function proceedAfterTurn(state: GameState): GameState {
   if (state.mode === "final") {
@@ -131,24 +164,16 @@ function proceedAfterTurn(state: GameState): GameState {
     };
   }
 
-  if (state.mode === "regular" && state.round.roundNumber > state.maxRounds) {
-    return {
-      ...state,
-      roundScoresPending: false,
-      turn: {
-        ...state.turn,
-        phase: "idle",
-        selectedClanId: null,
-        selectedQuestionId: null,
-      },
-      regularComplete: true,
-      timer: null,
-      error: null,
-    };
+  // Advance round only after the score table, so maxRounds / UI still show the finished round.
+  const clans = activeClans(state);
+  let round = state.round;
+  if (state.roundScoresPending) {
+    round = advanceRoundIfComplete(round, clans.length);
   }
 
-  return {
+  const cleared: GameState = {
     ...state,
+    round,
     roundScoresPending: false,
     turn: {
       phase: "idle",
@@ -158,6 +183,12 @@ function proceedAfterTurn(state: GameState): GameState {
     timer: null,
     error: null,
   };
+
+  if (state.mode === "regular" && round.roundNumber > state.maxRounds) {
+    return beginFinale({ ...cleared, regularComplete: true });
+  }
+
+  return cleared;
 }
 
 export function turnReducer(state: GameState, action: Action): GameState {
@@ -168,6 +199,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
   try {
     switch (action.type) {
       case "SPIN": {
+        if (state.mode === "final") return withError(state, "Juego terminado.");
         if (state.turn.phase !== "idle") return state;
         if (state.regularComplete && state.mode !== "tiebreak") return withError(state, "Juego terminado.");
         return spinToClan(state, rng);
@@ -291,20 +323,17 @@ export function turnReducer(state: GameState, action: Action): GameState {
         let nextTiebreakClanIds = state.tiebreakClanIds;
         
         const isRoundComplete = round.playedClanIds.length >= clans.length;
-        if (isRoundComplete) {
-          round = advanceRoundIfComplete(round, clans.length);
-          
-          if (state.mode === "tiebreak") {
-            const allClans = loadEventConfig().clans;
-            const ranking = rankClans(newScores, allClans);
-            const nextGroup = nextTieGroup(ranking);
-            
-            if (!nextGroup) {
-              nextMode = "final";
-              nextTiebreakClanIds = null;
-            } else {
-              nextTiebreakClanIds = nextGroup;
-            }
+        // Defer advanceRoundIfComplete until ACK_SCORES so the finished round stays visible.
+        if (isRoundComplete && state.mode === "tiebreak") {
+          const allClans = loadEventConfig().clans;
+          const ranking = rankClans(newScores, allClans);
+          const nextGroup = nextTieGroup(ranking);
+
+          if (!nextGroup) {
+            nextMode = "final";
+            nextTiebreakClanIds = null;
+          } else {
+            nextTiebreakClanIds = nextGroup;
           }
         }
         
@@ -344,27 +373,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
 
       case "BEGIN_FINALE": {
         if (!state.regularComplete) return state;
-        
-        const allClans = loadEventConfig().clans;
-        const ranking = rankClans(state.scores, allClans);
-        const nextGroup = nextTieGroup(ranking);
-        
-        if (nextGroup) {
-          return {
-            ...state,
-            mode: "tiebreak",
-            tiebreakClanIds: nextGroup,
-          };
-        } else {
-          return {
-            ...state,
-            mode: "final",
-            turn: {
-              ...state.turn,
-              phase: "final",
-            }
-          };
-        }
+        return beginFinale(state);
       }
 
       default:

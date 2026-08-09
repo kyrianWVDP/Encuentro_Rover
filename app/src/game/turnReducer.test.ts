@@ -210,22 +210,67 @@ describe("turnReducer", () => {
     expect(rot2 - rot1).toBeGreaterThanOrEqual(SPIN_EXTRA_TURNS * 360 - 720);
   });
 
+  it("initialGameState uses maxRounds and timerSec from event config", () => {
+    saveEventConfig({ ...defaultEventConfig(), maxRounds: 2, timerSec: 45 });
+    const s = initialGameState();
+    expect(s.maxRounds).toBe(2);
+    expect(s.timerSec).toBe(45);
+  });
+
+  it("ends after maxRounds and opens finale (podium or tiebreak)", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 2) as any, maxRounds: 2 });
+    let s = initialGameState(CLANS.slice(0, 2).map((c) => c.id));
+    expect(s.maxRounds).toBe(2);
+
+    // Two full rounds (2 clans × 2 rounds)
+    for (let r = 0; r < 2; r++) {
+      for (let i = 0; i < 2; i++) {
+        s = turnReducer(s, { type: "SPIN", rng: () => (i === 0 ? 0 : 0.99) });
+        s = turnReducer(s, { type: "SPIN_FINISHED" });
+        s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+        s = turnReducer(s, {
+          type: "REQUEST_JUDGE",
+          judgement: i === 0 ? "correct" : "incorrect",
+        });
+        s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+        s = turnReducer(s, { type: "ACK_REVEAL" });
+        if (s.turn.phase === "showScores") {
+          expect(s.round.roundNumber).toBe(r + 1); // still on finished round until ACK
+          s = turnReducer(s, { type: "ACK_SCORES" });
+        }
+      }
+    }
+
+    expect(s.regularComplete).toBe(true);
+    expect(s.mode).toBe("final");
+    expect(s.turn.phase).toBe("final");
+    expect(s.round.roundNumber).toBe(3); // advanced past maxRounds
+  });
+
   it("regularComplete becomes true when round > maxRounds", () => {
-    let s = initialGameState();
-    s.maxRounds = 1; // force early end
-    for (let i = 0; i < 8; i++) {
-      s = turnReducer(s, { type: "SPIN", rng: () => 0 });
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 2) as any });
+    let s = initialGameState(CLANS.slice(0, 2).map((c) => c.id));
+    s.maxRounds = 1;
+    // Distinct scores so finale goes to podium, not tiebreak
+    for (let i = 0; i < 2; i++) {
+      s = turnReducer(s, { type: "SPIN", rng: () => (i === 0 ? 0 : 0.99) });
       s = turnReducer(s, { type: "SPIN_FINISHED" });
       s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
-      s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+      s = turnReducer(s, {
+        type: "REQUEST_JUDGE",
+        judgement: i === 0 ? "correct" : "incorrect",
+      });
       s = turnReducer(s, { type: "CONFIRM_JUDGE" });
       s = turnReducer(s, { type: "ACK_REVEAL" });
-      s = turnReducer(s, { type: "ACK_SCORES" });
+      if (s.turn.phase === "showScores") {
+        s = turnReducer(s, { type: "ACK_SCORES" });
+      }
     }
     expect(s.regularComplete).toBe(true);
-    expect(s.turn.phase).toBe("idle");
-    
-    // SPIN not allowed when regularComplete and mode != tiebreak
+    expect(s.mode).toBe("final");
+    expect(s.turn.phase).toBe("final");
+
+    // SPIN not allowed when final
     s = turnReducer(s, { type: "SPIN", rng: () => 0 });
     expect(s.error).toBe("Juego terminado.");
   });

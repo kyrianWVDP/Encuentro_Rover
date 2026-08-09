@@ -7,7 +7,7 @@ import {
 import type { EventConfig, ClanConfig } from "../game/eventConfig";
 import { parseQuestionsJson, parseQuestionsCsv } from "../game/questionImport";
 import { initialGameStateFromConfig } from "../game/turnReducer";
-import { publishGameState } from "../game/sync";
+import { publishGameState, loadGameState } from "../game/sync";
 import { ClanAvatar } from "./ClanAvatar";
 import { ConfirmModal } from "./ConfirmModal";
 import "./SetupScreen.css";
@@ -31,7 +31,17 @@ export function SetupScreen() {
 
   const handleSave = () => {
     saveEventConfig(config);
-    alert("Configuración guardada correctamente.");
+    const current = loadGameState();
+    if (current) {
+      publishGameState({
+        ...current,
+        maxRounds: config.maxRounds,
+        timerSec: config.timerSec,
+      });
+    }
+    alert(
+      "Configuración guardada. Rondas y timer se aplican a la partida actual. Para empezar de cero usá «Reiniciar Partida».",
+    );
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

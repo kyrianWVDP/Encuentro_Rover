@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { turnReducer, initialGameState } from "../game/turnReducer";
 import type { Action, GameState } from "../game/turnReducer";
-import { publishGameState, loadGameState } from "../game/sync";
+import { publishGameState, loadGameState, subscribeGameState } from "../game/sync";
 import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { SPIN_DURATION_MS } from "../game/spin";
@@ -53,6 +53,31 @@ export function HostScreen() {
       return next;
     });
   };
+
+  // Keep Host in sync when Setup (or another tab) publishes game/config changes.
+  useEffect(() => {
+    return subscribeGameState(setState);
+  }, []);
+
+  // Apply event maxRounds / timerSec to the live game (config is source of truth).
+  useEffect(() => {
+    const eventConfig = loadEventConfig();
+    setState((prev) => {
+      if (
+        prev.maxRounds === eventConfig.maxRounds &&
+        prev.timerSec === eventConfig.timerSec
+      ) {
+        return prev;
+      }
+      const next = {
+        ...prev,
+        maxRounds: eventConfig.maxRounds,
+        timerSec: eventConfig.timerSec,
+      };
+      publishGameState(next);
+      return next;
+    });
+  }, []);
 
   // Timer tick
   useEffect(() => {
@@ -136,7 +161,10 @@ export function HostScreen() {
         </div>
         <div className="header-right">
           <p className="round-label">Ronda</p>
-          <h2>{round.roundNumber}</h2>
+          <h2>
+            {round.roundNumber}
+            <span className="round-of"> / {state.maxRounds}</span>
+          </h2>
         </div>
       </header>
 
@@ -279,7 +307,11 @@ export function HostScreen() {
                 </button>
               )}
               {phase === "showScores" && (
-                <button onClick={() => dispatch({ type: "ACK_SCORES" })}>Siguiente turno</button>
+                <button onClick={() => dispatch({ type: "ACK_SCORES" })}>
+                  {mode === "regular" && round.roundNumber >= state.maxRounds
+                    ? "Ver podio final"
+                    : "Siguiente turno"}
+                </button>
               )}
             </div>
           </div>

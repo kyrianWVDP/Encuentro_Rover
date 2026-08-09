@@ -145,6 +145,12 @@
   font-weight: 700;
 }
 
+.header-right .round-of {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--host-muted);
+}
+
 .error-banner {
   background-color: rgba(201, 68, 58, 0.18);
   color: #ffb4ae;
