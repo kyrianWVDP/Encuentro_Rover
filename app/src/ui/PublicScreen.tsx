@@ -11,6 +11,7 @@ import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
 import { ClanAvatar } from "./ClanAvatar";
+import { FitToStage } from "./FitToStage";
 import { useGameSounds } from "./useGameSounds";
 import { unlockAudio, isMuted, setMuted } from "../game/sounds";
 import "./PublicScreen.css";
@@ -107,18 +108,20 @@ export function PublicScreen() {
         if (!selectedClan) return null;
         return (
           <div className="public-content clan-reveal-layout">
-            <div className="clan-reveal-hero">
-              <ClanAvatar
-                nombre={selectedClan.nombre}
-                logoUrl={selectedClan.logoUrl}
-                color={selectedClan.color}
-                size={160}
-              />
-              <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
-              {selectedClan.representante && (
-                <p className="clan-representante">{selectedClan.representante}</p>
-              )}
-            </div>
+            <FitToStage token={`reveal:${selectedClan.id}`}>
+              <div className="clan-reveal-hero">
+                <ClanAvatar
+                  nombre={selectedClan.nombre}
+                  logoUrl={selectedClan.logoUrl}
+                  color={selectedClan.color}
+                  size={160}
+                />
+                <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
+                {selectedClan.representante && (
+                  <p className="clan-representante">{selectedClan.representante}</p>
+                )}
+              </div>
+            </FitToStage>
           </div>
         );
       }
@@ -131,44 +134,45 @@ export function PublicScreen() {
           : null;
         return (
           <div className="public-content question-layout">
-            {selectedClan && (
-              <div className="clan-question-header">
-                <ClanAvatar
-                  nombre={selectedClan.nombre}
-                  logoUrl={selectedClan.logoUrl}
-                  color={selectedClan.color}
-                  size={88}
-                />
-                <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
-                {selectedClan.representante && (
-                  <p className="clan-representante">{selectedClan.representante}</p>
-                )}
-              </div>
-            )}
-            {question && (
-              <div className="question-scroll">
-                <div className="question-scroll-roller question-scroll-roller-top" aria-hidden />
-                <div className="question-card">
-                  <p className="question-label">Pregunta</p>
-                  <h2 className="question-text">{question.texto}</h2>
-                  {canShowAnswer(phase) && (
-                    <div className="answer-block">
-                      <p className="answer-label">Respuesta oficial</p>
-                      <p className="answer-text">{question.respuestaCorrecta}</p>
-                    </div>
-                  )}
+            <FitToStage
+              token={`q:${phase}:${selectedQuestionId ?? ""}:${canShowAnswer(phase)}:${selectedClanId ?? ""}`}
+            >
+              {selectedClan && (
+                <div className="clan-question-header">
+                  <ClanAvatar
+                    nombre={selectedClan.nombre}
+                    logoUrl={selectedClan.logoUrl}
+                    color={selectedClan.color}
+                    size={72}
+                  />
+                  <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
                 </div>
-                <div className="question-scroll-roller question-scroll-roller-bottom" aria-hidden />
-              </div>
-            )}
-            {timer && phase !== "revealAnswer" && (
-              <TimerDisplay
-                endsAt={timer.endsAt}
-                running={timer.running}
-                remainingMs={timer.remainingMs}
-                size="hero"
-              />
-            )}
+              )}
+              {question && (
+                <div className="question-scroll">
+                  <div className="question-scroll-roller question-scroll-roller-top" aria-hidden />
+                  <div className="question-card">
+                    <p className="question-label">Pregunta</p>
+                    <h2 className="question-text">{question.texto}</h2>
+                    {canShowAnswer(phase) && (
+                      <div className="answer-block">
+                        <p className="answer-label">Respuesta oficial</p>
+                        <p className="answer-text">{question.respuestaCorrecta}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="question-scroll-roller question-scroll-roller-bottom" aria-hidden />
+                </div>
+              )}
+              {timer && phase !== "revealAnswer" && (
+                <TimerDisplay
+                  endsAt={timer.endsAt}
+                  running={timer.running}
+                  remainingMs={timer.remainingMs}
+                  size="hero"
+                />
+              )}
+            </FitToStage>
           </div>
         );
       }
@@ -194,6 +198,10 @@ export function PublicScreen() {
 
   const hidePageTitle =
     phase === "showScores" ||
+    phase === "questionRunning" ||
+    phase === "awaitingJudgement" ||
+    phase === "revealAnswer" ||
+    phase === "clanRevealed" ||
     mode === "final" ||
     (regularComplete && mode === "regular");
 

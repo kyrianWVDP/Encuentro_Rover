@@ -1,7 +1,8 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { Clan } from "../game/types";
 import { POINTS_CORRECT } from "../game/scoring";
 import { ClanAvatar } from "./ClanAvatar";
+import { useFitScale } from "./useFitScale";
 import "./ScoreTable.css";
 
 type ScoreTableProps = {
@@ -118,48 +119,6 @@ function ScoreRow({
       </td>
     </tr>
   );
-}
-
-/** Scale the parchment so the full board fits inside its parent (projector). */
-function useFitScale(
-  enabled: boolean,
-  token: string,
-): { ref: React.RefObject<HTMLDivElement | null>; scale: number } {
-  const ref = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    if (!enabled) {
-      setScale(1);
-      return;
-    }
-    const el = ref.current;
-    const parent = el?.parentElement;
-    if (!el || !parent) return;
-
-    const fit = () => {
-      el.style.transform = "scale(1)";
-      const availW = Math.max(0, parent.clientWidth - 8);
-      const availH = Math.max(0, parent.clientHeight - 8);
-      const needW = el.offsetWidth;
-      const needH = el.offsetHeight;
-      if (needW <= 0 || needH <= 0 || availW <= 0 || availH <= 0) {
-        setScale(1);
-        return;
-      }
-      const next = Math.min(1, availW / needW, availH / needH);
-      setScale(Math.max(0.55, Number(next.toFixed(3))));
-    };
-
-    fit();
-    const ro = new ResizeObserver(() => {
-      requestAnimationFrame(fit);
-    });
-    ro.observe(parent);
-    return () => ro.disconnect();
-  }, [enabled, token]);
-
-  return { ref, scale };
 }
 
 export const ScoreTable: React.FC<ScoreTableProps> = ({
