@@ -288,6 +288,25 @@
   pointer-events: none;
 }
 
+.audio-unlock-btn {
+  pointer-events: auto;
+  z-index: 5;
+  border: 1px solid rgba(241, 196, 15, 0.55);
+  background: rgba(12, 14, 18, 0.82);
+  color: #f1c40f;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.audio-unlock-btn:hover {
+  background: rgba(20, 24, 30, 0.92);
+  color: #ffe08a;
+}
+
 .public-end-title {
   margin: 0 0 1.25rem;
   font-family: "UnifrakturCook", "Cinzel Decorative", serif;

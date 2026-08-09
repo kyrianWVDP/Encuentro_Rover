@@ -12,7 +12,7 @@ import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
 import { ClanAvatar } from "./ClanAvatar";
 import { useGameSounds } from "./useGameSounds";
-import { unlockAudio } from "../game/sounds";
+import { unlockAudio, isMuted, setMuted } from "../game/sounds";
 import "./PublicScreen.css";
 
 export function PublicScreen() {
@@ -32,11 +32,15 @@ export function PublicScreen() {
 
   const [audioReady, setAudioReady] = useState(false);
   const unlockedRef = useRef(false);
-  const handleFirstInteraction = () => {
-    if (unlockedRef.current) return;
-    unlockedRef.current = true;
+  const enableAudio = () => {
+    if (isMuted()) setMuted(false);
     unlockAudio();
+    unlockedRef.current = true;
     setAudioReady(true);
+  };
+  const handleFirstInteraction = () => {
+    if (unlockedRef.current && audioReady && !isMuted()) return;
+    enableAudio();
   };
 
   const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds, lastJudgement } = gameState;
@@ -196,7 +200,8 @@ export function PublicScreen() {
   return (
     <main
       className={`public-screen${mode === "final" ? " public-screen--final" : ""}${hidePageTitle ? " public-screen--scores" : ""}`}
-      onClick={handleFirstInteraction}
+      onPointerDown={handleFirstInteraction}
+      onKeyDown={handleFirstInteraction}
     >
       {!hidePageTitle && (
         <header className="public-title-block">
@@ -205,7 +210,13 @@ export function PublicScreen() {
         </header>
       )}
       {!audioReady && (
-        <p className="audio-unlock-hint">Tocá la pantalla para activar el sonido</p>
+        <button
+          type="button"
+          className="audio-unlock-hint audio-unlock-btn"
+          onClick={enableAudio}
+        >
+          Tocá aquí para activar el sonido
+        </button>
       )}
       {mode === "tiebreak" && (
         <div className="tiebreak-banner public-banner">
