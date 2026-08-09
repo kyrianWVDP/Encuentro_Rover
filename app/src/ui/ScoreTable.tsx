@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { Clan } from "../game/types";
 import { POINTS_CORRECT } from "../game/scoring";
 import { ClanAvatar } from "./ClanAvatar";
