@@ -182,7 +182,6 @@
   max-width: min(640px, 94vw);
   width: min(640px, 94vw);
   flex-shrink: 0;
-  will-change: transform;
 }
 
 .score-scroll--projector .score-scroll-roller {

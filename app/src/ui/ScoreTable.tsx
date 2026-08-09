@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { Clan } from "../game/types";
 import { POINTS_CORRECT } from "../game/scoring";
 import { ClanAvatar } from "./ClanAvatar";
-import { useFitScale } from "./useFitScale";
+import { FitToStage } from "./FitToStage";
 import "./ScoreTable.css";
 
 type ScoreTableProps = {
@@ -142,7 +142,6 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
   const isProjector = size === "projector";
   const avatarSize = isProjector ? 34 : 28;
   const fitToken = `${visibleClans.length}:${animate}:${highlightClanId ?? ""}:${visibleClans.map((c) => `${c.id}=${scores[c.id] || 0}`).join(",")}`;
-  const { ref, scale } = useFitScale(isProjector, fitToken);
   const scrollClass = [
     "score-scroll",
     isProjector ? "score-scroll--projector" : "",
@@ -151,16 +150,8 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
     .filter(Boolean)
     .join(" ");
 
-  return (
-    <div
-      ref={ref}
-      className={scrollClass}
-      style={
-        isProjector
-          ? { transform: `scale(${scale})`, transformOrigin: "center center" }
-          : undefined
-      }
-    >
+  const table = (
+    <div className={scrollClass}>
       <div className="score-scroll-roller score-scroll-roller-top" aria-hidden />
       <div className="score-table-container">
         <h3 className="score-scroll-title">
@@ -194,4 +185,9 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
       <div className="score-scroll-roller score-scroll-roller-bottom" aria-hidden />
     </div>
   );
+
+  if (isProjector) {
+    return <FitToStage token={fitToken}>{table}</FitToStage>;
+  }
+  return table;
 };
