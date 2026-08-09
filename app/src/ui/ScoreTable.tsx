@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Clan } from "../game/types";
 import { POINTS_CORRECT } from "../game/scoring";
 import { ClanAvatar } from "./ClanAvatar";
@@ -53,6 +53,7 @@ type ScoreRowProps = {
   highlightClanId?: string | null;
   lastJudgement?: "correct" | "incorrect" | null;
   avatarSize: number;
+  showRepresentante: boolean;
 };
 
 function ScoreRow({
@@ -64,6 +65,7 @@ function ScoreRow({
   highlightClanId,
   lastJudgement,
   avatarSize,
+  showRepresentante,
 }: ScoreRowProps) {
   const shouldCount =
     animate &&
@@ -101,7 +103,7 @@ function ScoreRow({
             >
               {clan.nombre}
             </span>
-            {clan.representante && (
+            {showRepresentante && clan.representante && (
               <span className="clan-representante">
                 {clan.representante}
               </span>
@@ -116,6 +118,48 @@ function ScoreRow({
       </td>
     </tr>
   );
+}
+
+/** Scale the parchment so the full board fits inside its parent (projector). */
+function useFitScale(
+  enabled: boolean,
+  token: string,
+): { ref: React.RefObject<HTMLDivElement | null>; scale: number } {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    if (!enabled) {
+      setScale(1);
+      return;
+    }
+    const el = ref.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+
+    const fit = () => {
+      el.style.transform = "scale(1)";
+      const availW = Math.max(0, parent.clientWidth - 8);
+      const availH = Math.max(0, parent.clientHeight - 8);
+      const needW = el.offsetWidth;
+      const needH = el.offsetHeight;
+      if (needW <= 0 || needH <= 0 || availW <= 0 || availH <= 0) {
+        setScale(1);
+        return;
+      }
+      const next = Math.min(1, availW / needW, availH / needH);
+      setScale(Math.max(0.55, Number(next.toFixed(3))));
+    };
+
+    fit();
+    const ro = new ResizeObserver(() => {
+      requestAnimationFrame(fit);
+    });
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [enabled, token]);
+
+  return { ref, scale };
 }
 
 export const ScoreTable: React.FC<ScoreTableProps> = ({
@@ -136,17 +180,28 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
     typeof topN === "number" && topN > 0
       ? sortedClans.slice(0, topN)
       : sortedClans;
-  const avatarSize = size === "projector" ? 32 : 28;
+  const isProjector = size === "projector";
+  const avatarSize = isProjector ? 34 : 28;
+  const fitToken = `${visibleClans.length}:${animate}:${highlightClanId ?? ""}:${visibleClans.map((c) => `${c.id}=${scores[c.id] || 0}`).join(",")}`;
+  const { ref, scale } = useFitScale(isProjector, fitToken);
   const scrollClass = [
     "score-scroll",
-    size === "projector" ? "score-scroll--projector" : "",
+    isProjector ? "score-scroll--projector" : "",
     animate ? "score-scroll--animate" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <div className={scrollClass}>
+    <div
+      ref={ref}
+      className={scrollClass}
+      style={
+        isProjector
+          ? { transform: `scale(${scale})`, transformOrigin: "center center" }
+          : undefined
+      }
+    >
       <div className="score-scroll-roller score-scroll-roller-top" aria-hidden />
       <div className="score-table-container">
         <h3 className="score-scroll-title">
@@ -171,6 +226,7 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
                 highlightClanId={highlightClanId}
                 lastJudgement={lastJudgement}
                 avatarSize={avatarSize}
+                showRepresentante={!isProjector}
               />
             ))}
           </tbody>

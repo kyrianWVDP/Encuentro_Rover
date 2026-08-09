@@ -188,15 +188,22 @@ export function PublicScreen() {
     }
   };
 
+  const hidePageTitle =
+    phase === "showScores" ||
+    mode === "final" ||
+    (regularComplete && mode === "regular");
+
   return (
     <main
-      className={`public-screen${mode === "final" ? " public-screen--final" : ""}`}
+      className={`public-screen${mode === "final" ? " public-screen--final" : ""}${hidePageTitle ? " public-screen--scores" : ""}`}
       onClick={handleFirstInteraction}
     >
-      <header className="public-title-block">
-        <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
-        <h1 className="public-title">{config.titulo}</h1>
-      </header>
+      {!hidePageTitle && (
+        <header className="public-title-block">
+          <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
+          <h1 className="public-title">{config.titulo}</h1>
+        </header>
+      )}
       {!audioReady && (
         <p className="audio-unlock-hint">Tocá la pantalla para activar el sonido</p>
       )}

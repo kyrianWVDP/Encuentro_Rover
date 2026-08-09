@@ -1,7 +1,7 @@
 .public-screen {
   /* Fill the display; keep a small overscan gutter (projectors often crop edges) */
-  --projector-safe-x: max(2.5vw, 12px);
-  --projector-safe-y: max(2.5vh, 12px);
+  --projector-safe-x: max(2vw, 10px);
+  --projector-safe-y: max(2vh, 10px);
 
   position: fixed;
   inset: 0;
@@ -14,9 +14,8 @@
   align-items: center;
   justify-content: center;
   background-color: #0c0e12;
-  /* Portrait artwork: contain shows the full emblem on widescreen projectors */
   background-image: var(--asset-encuentro-fondo);
-  background-size: contain;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: #ffffff;
@@ -122,17 +121,17 @@
   box-sizing: border-box;
 }
 
-/* Scoreboard must clear the absolute page title and fit 8 rows on one screen */
+/* Scoreboard must clear overlays and give the table room to auto-scale */
 .scores-layout {
   justify-content: center;
-  padding: 6.75rem 1rem 2rem;
+  align-items: center;
+  padding: 0.5rem;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-.scores-layout .score-scroll {
-  flex-shrink: 1;
-  min-height: 0;
+.public-screen--scores .public-title-block {
+  display: none;
 }
 
 .question-layout {
