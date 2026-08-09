@@ -60,4 +60,15 @@ describe("nextTieGroup", () => {
     ];
     expect(nextTieGroup(rows)).toEqual(["b", "c"]);
   });
+
+  it("ignores ties below 3rd place", () => {
+    const rows = [
+      { clanId: "a", puesto: 1, puntos: 40 },
+      { clanId: "b", puesto: 2, puntos: 30 },
+      { clanId: "c", puesto: 3, puntos: 20 },
+      { clanId: "d", puesto: 4, puntos: 10 },
+      { clanId: "e", puesto: 4, puntos: 10 },
+    ];
+    expect(nextTieGroup(rows)).toBeNull();
+  });
 });

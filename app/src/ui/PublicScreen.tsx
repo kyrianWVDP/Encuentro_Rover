@@ -205,16 +205,25 @@ export function PublicScreen() {
     mode === "final" ||
     (regularComplete && mode === "regular");
 
+  const showEventTitle = !hidePageTitle && mode !== "tiebreak";
+  const showTiebreakTitle = mode === "tiebreak";
+
   return (
     <main
-      className={`public-screen${mode === "final" ? " public-screen--final" : ""}${hidePageTitle ? " public-screen--scores" : ""}`}
+      className={`public-screen${mode === "final" ? " public-screen--final" : ""}${hidePageTitle && mode !== "tiebreak" ? " public-screen--scores" : ""}${mode === "tiebreak" ? " public-screen--tiebreak" : ""}`}
       onPointerDown={handleFirstInteraction}
       onKeyDown={handleFirstInteraction}
     >
-      {!hidePageTitle && (
+      {showEventTitle && (
         <header className="public-title-block">
           <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
           <h1 className="public-title">{config.titulo}</h1>
+        </header>
+      )}
+      {showTiebreakTitle && (
+        <header className="public-title-block public-title-block--tiebreak">
+          <p className="public-title-eyebrow">Desempate</p>
+          <h1 className="public-title public-title--tiebreak">Mata-mata</h1>
         </header>
       )}
       {!audioReady && (
@@ -225,11 +234,6 @@ export function PublicScreen() {
         >
           Tocá aquí para activar el sonido
         </button>
-      )}
-      {mode === "tiebreak" && (
-        <div className="tiebreak-banner public-banner">
-          <h1>MATA-MATA (Desempate)</h1>
-        </div>
       )}
       {renderContent()}
       <div className="bottom-links">

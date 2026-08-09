@@ -22,11 +22,13 @@ export function rankClans(
   return rows;
 }
 
-/** Highest-priority tied group still unresolved, or null if ranking unique. */
+/** Highest-priority tied group on the podium (1.º–3.º), or null if podium is unique. */
 export function nextTieGroup(rows: RankRow[]): string[] | null {
+  const PODIUM_MAX_PUESTO = 3;
   const byPuesto = new Map<number, string[]>();
 
   for (const row of rows) {
+    if (row.puesto > PODIUM_MAX_PUESTO) continue;
     const group = byPuesto.get(row.puesto) ?? [];
     group.push(row.clanId);
     byPuesto.set(row.puesto, group);

@@ -87,6 +87,18 @@
     0 4px 18px rgba(0, 0, 0, 0.85);
 }
 
+.public-title--tiebreak {
+  font-family: "Cinzel Decorative", "Palatino Linotype", serif;
+  color: #ffb4ae;
+  text-shadow:
+    0 2px 0 #4a1510,
+    0 4px 18px rgba(0, 0, 0, 0.85);
+}
+
+.public-title-block--tiebreak .public-title-eyebrow {
+  color: #ffb4ae;
+}
+
 .public-screen .public-title,
 .public-screen h1 {
   margin: 0;

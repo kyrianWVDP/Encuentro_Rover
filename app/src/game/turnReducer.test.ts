@@ -336,11 +336,39 @@ describe("turnReducer", () => {
     // Tie is now broken (clan 0 has 40, clan 1 has 30), so mode should be final since no other ties exist
     expect(s.mode).toBe("final");
     expect(s.tiebreakClanIds).toBeNull();
-    
-    // Acknowledge reveal and scores, should end up in 'final' phase
+    expect(s.turn.phase).toBe("final");
+  });
+
+  it("goes to final after podium ties resolve even if 4th place is still tied", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 5) as any });
+    let s = initialGameState(CLANS.slice(0, 5).map((c) => c.id));
+    s.regularComplete = true;
+    s.scores = {
+      [CLANS[0].id]: 30,
+      [CLANS[1].id]: 30,
+      [CLANS[2].id]: 20,
+      [CLANS[3].id]: 10,
+      [CLANS[4].id]: 10,
+    };
+    s = turnReducer(s, { type: "BEGIN_FINALE" });
+    expect(s.mode).toBe("tiebreak");
+    expect(s.tiebreakClanIds).toEqual([CLANS[0].id, CLANS[1].id]);
+
+    s = turnReducer(s, { type: "SPIN", rng: rng0 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
     s = turnReducer(s, { type: "ACK_REVEAL" });
-    s = turnReducer(s, { type: "ACK_SCORES" });
-    
+
+    s = turnReducer(s, { type: "SPIN", rng: () => 0.99 });
+    s = turnReducer(s, { type: "SPIN_FINISHED" });
+    s = turnReducer(s, { type: "START_QUESTION", rng: rng0 });
+    s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
+    s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+
+    // 1–3 unique (40/30/20); 4th still tied — podium does not require breaking 4th
+    expect(s.mode).toBe("final");
     expect(s.turn.phase).toBe("final");
   });
 });

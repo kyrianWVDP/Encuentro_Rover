@@ -336,7 +336,29 @@ export function turnReducer(state: GameState, action: Action): GameState {
             nextTiebreakClanIds = nextGroup;
           }
         }
-        
+
+        // When the podium is settled, go straight to final (skip leftover reveal/scores).
+        if (nextMode === "final" && state.mode === "tiebreak") {
+          return {
+            ...state,
+            round,
+            scores: newScores,
+            mode: "final",
+            tiebreakClanIds: null,
+            lastJudgement: state.pendingJudgement,
+            pendingJudgement: null,
+            roundScoresPending: false,
+            turn: {
+              ...state.turn,
+              phase: "final",
+              selectedClanId: null,
+              selectedQuestionId: null,
+            },
+            timer: null,
+            error: null,
+          };
+        }
+
         return {
           ...state,
           round,

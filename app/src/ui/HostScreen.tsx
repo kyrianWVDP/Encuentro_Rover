@@ -141,7 +141,11 @@ export function HostScreen() {
         <div className="header-left">
           <div className="header-brand">
             <p className="eyebrow">Encuentro Rover 2026</p>
-            <h1>Panel Host · Justas del Saber</h1>
+            <h1>
+              {mode === "tiebreak"
+                ? "Panel Host · Mata-mata"
+                : "Panel Host · Justas del Saber"}
+            </h1>
           </div>
           <div className="header-actions">
             <Link to="/" target="_blank" className="public-link">
@@ -310,7 +314,9 @@ export function HostScreen() {
                 <button onClick={() => dispatch({ type: "ACK_SCORES" })}>
                   {mode === "regular" && round.roundNumber >= state.maxRounds
                     ? "Ver podio final"
-                    : "Siguiente turno"}
+                    : mode === "tiebreak"
+                      ? "Continuar desempate"
+                      : "Siguiente turno"}
                 </button>
               )}
             </div>

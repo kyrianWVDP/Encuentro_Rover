@@ -36,15 +36,20 @@ export function rankClans(scores: Record<string, number>, clans: { id: string }[
 }
 
 export function nextTieGroup(ranking: RankedClan[]): string[] | null {
+  // Only break ties that affect the podium (1.º–3.º). Ties for 4.º+ can stay.
+  const PODIUM_MAX_PUESTO = 3;
   const groups = new Map<number, string[]>();
   for (const r of ranking) {
+    if (r.puesto > PODIUM_MAX_PUESTO) continue;
     if (!groups.has(r.puesto)) {
       groups.set(r.puesto, []);
     }
     groups.get(r.puesto)!.push(r.clanId);
   }
-  
-  for (const group of groups.values()) {
+
+  const puestos = [...groups.keys()].sort((a, b) => a - b);
+  for (const puesto of puestos) {
+    const group = groups.get(puesto)!;
     if (group.length > 1) {
       return group;
     }

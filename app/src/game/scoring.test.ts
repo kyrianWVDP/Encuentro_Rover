@@ -38,10 +38,16 @@ describe("scoring", () => {
     
     expect(nextTieGroup(ranking2)).toEqual(["A", "C"]);
     
-    // No ties
+    // No ties on podium
     const scores3 = { A: 25, B: 40, C: 20, D: 30, E: 10 };
     const ranking3 = rankClans(scores3, clans);
     expect(nextTieGroup(ranking3)).toBeNull();
+  });
+
+  it("ignores ties below 3rd place so the podium can show", () => {
+    const clans = [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }];
+    const scores = { A: 40, B: 30, C: 20, D: 10, E: 10 };
+    expect(nextTieGroup(rankClans(scores, clans))).toBeNull();
   });
 });
 
