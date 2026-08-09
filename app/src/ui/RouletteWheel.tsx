@@ -1,8 +1,8 @@
-import React from 'react';
-import type { Clan } from '../game/types';
-import { SPIN_DURATION_MS } from '../game/spin';
-import { ClanAvatar } from './ClanAvatar';
-import './RouletteWheel.css';
+import React from "react";
+import type { Clan } from "../game/types";
+import { SPIN_DURATION_MS } from "../game/spin";
+import { ClanAvatar } from "./ClanAvatar";
+import "./RouletteWheel.css";
 
 type RouletteWheelProps = {
   clans: Clan[];
@@ -26,28 +26,33 @@ export const RouletteWheel: React.FC<RouletteWheelProps> = ({
   const sectorDegrees = 360 / clans.length;
   const isProjector = size === "projector";
   const logoSize = isProjector ? 72 : 48;
-  const translateY = isProjector ? -175 : -110;
+  // % of sector box so the wheel scales cleanly on low-res projectors
+  const radiusPercent = isProjector ? -158 : -152;
 
   return (
-    <div className={`roulette-container${isProjector ? " roulette-container--projector" : ""}`}>
-      <div className="roulette-pointer"></div>
+    <div
+      className={`roulette-container${isProjector ? " roulette-container--projector" : ""}`}
+    >
+      <div className="roulette-pointer" />
       <div
         className="roulette-wheel"
         style={{
           transform: `rotate(${rotationDeg}deg)`,
-          transition: spinning ? `transform ${durationMs}ms cubic-bezier(0.12, 0.8, 0.2, 1)` : 'none'
+          transition: spinning
+            ? `transform ${durationMs}ms cubic-bezier(0.12, 0.8, 0.2, 1)`
+            : "none",
         }}
       >
         {clans.map((clan, i) => {
           const isPlayed = playedClanIds.includes(clan.id);
           const isSelected = clan.id === selectedClanId && !spinning;
-          
+
           return (
             <div
               key={clan.id}
-              className={`roulette-sector ${isPlayed ? 'played' : ''} ${isSelected ? 'selected' : ''}`}
+              className={`roulette-sector${isPlayed ? " played" : ""}${isSelected ? " selected" : ""}`}
               style={{
-                transform: `rotate(${i * sectorDegrees}deg) translateY(${translateY}px)`,
+                transform: `translate(-50%, -50%) rotate(${i * sectorDegrees}deg) translateY(${radiusPercent}%)`,
               }}
             >
               <div

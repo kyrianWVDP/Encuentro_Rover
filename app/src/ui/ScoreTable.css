@@ -180,8 +180,8 @@
 /* Projector / public screen — sized to fit 8 clans under the page title */
 .score-scroll--projector {
   max-width: min(560px, 92vw);
-  max-height: calc(100dvh - 8.75rem);
-  max-height: calc(100vh - 8.75rem);
+  max-height: calc(100dvh - 8.75rem - 5vh);
+  max-height: calc(100vh - 8.75rem - 5vh);
 }
 
 .score-scroll--projector .score-scroll-roller {

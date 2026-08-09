@@ -62,10 +62,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 72px;
-  height: 72px;
-  margin-top: -36px;
-  margin-left: -36px;
+  width: 22.5%;
+  height: 22.5%;
+  margin-top: 0;
+  margin-left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,14 +88,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
   padding: 2px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.roulette-label .clan-avatar {
+  width: 85% !important;
+  height: 85% !important;
 }
 
 .roulette-container--projector {
-  width: 500px;
-  height: 500px;
+  /* Scales down on short / low-res projector displays */
+  width: min(500px, 62vmin);
+  height: min(500px, 62vmin);
   margin: 0 auto;
 }
 
@@ -107,8 +116,6 @@
 }
 
 .roulette-container--projector .roulette-sector {
-  width: 96px;
-  height: 96px;
-  margin-top: -48px;
-  margin-left: -48px;
+  width: 20%;
+  height: 20%;
 }
