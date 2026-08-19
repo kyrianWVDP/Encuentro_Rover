@@ -322,7 +322,7 @@ describe("turnReducer", () => {
 
     // Second clan plays
     s = turnReducer(s, { type: "ACK_REVEAL" });
-    s = turnReducer(s, { type: "ACK_SCORES" });
+    expect(s.turn.phase).toBe("idle");
     s = turnReducer(s, { type: "SPIN", rng: () => 0.99 }); // will pick clan 1
     expect(s.turn.selectedClanId).toBe(CLANS[1].id);
 
@@ -370,5 +370,36 @@ describe("turnReducer", () => {
     // 1–3 unique (40/30/20); 4th still tied — podium does not require breaking 4th
     expect(s.mode).toBe("final");
     expect(s.turn.phase).toBe("final");
+  });
+
+  it("tiebreak bout that stays tied skips scoreboard and does not bump roundNumber", () => {
+    saveEventConfig({ ...defaultEventConfig(), clans: CLANS.slice(0, 3) as any });
+    let s = initialGameState(CLANS.slice(0, 3).map((c) => c.id));
+    s.regularComplete = true;
+    s.maxRounds = 2;
+    s.round = { ...s.round, roundNumber: 2 };
+    s.scores = {
+      [CLANS[0].id]: 30,
+      [CLANS[1].id]: 30,
+      [CLANS[2].id]: 10,
+    };
+    s = turnReducer(s, { type: "BEGIN_FINALE" });
+    expect(s.mode).toBe("tiebreak");
+
+    for (let i = 0; i < 2; i++) {
+      s = turnReducer(s, { type: "SPIN", rng: () => (i === 0 ? 0 : 0.99) });
+      s = turnReducer(s, { type: "SPIN_FINISHED" });
+      s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
+      s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "correct" });
+      s = turnReducer(s, { type: "CONFIRM_JUDGE" });
+      expect(s.roundScoresPending).toBe(false);
+      expect(s.turn.phase).toBe("revealAnswer");
+      s = turnReducer(s, { type: "ACK_REVEAL" });
+    }
+
+    expect(s.mode).toBe("tiebreak");
+    expect(s.turn.phase).toBe("idle");
+    expect(s.round.roundNumber).toBe(2);
+    expect(s.round.playedClanIds).toEqual([]);
   });
 });

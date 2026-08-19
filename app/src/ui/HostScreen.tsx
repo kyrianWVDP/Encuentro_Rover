@@ -164,11 +164,20 @@ export function HostScreen() {
           </div>
         </div>
         <div className="header-right">
-          <p className="round-label">Ronda</p>
-          <h2>
-            {round.roundNumber}
-            <span className="round-of"> / {state.maxRounds}</span>
-          </h2>
+          {mode === "tiebreak" ? (
+            <>
+              <p className="round-label">Desempate</p>
+              <h2>Mata-mata</h2>
+            </>
+          ) : (
+            <>
+              <p className="round-label">Ronda</p>
+              <h2>
+                {round.roundNumber}
+                <span className="round-of"> / {state.maxRounds}</span>
+              </h2>
+            </>
+          )}
         </div>
       </header>
 

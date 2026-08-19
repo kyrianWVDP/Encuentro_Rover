@@ -135,6 +135,14 @@
   width: 5.5rem;
 }
 
+.score-scroll .rank-cell {
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  width: 2.75rem;
+  text-align: center;
+  color: var(--scroll-ink-soft);
+}
+
 .score-scroll .clan-cell {
   display: flex;
   align-items: center;
@@ -149,8 +157,8 @@
 }
 
 .score-scroll .clan-name {
-  font-family: "UnifrakturCook", "Cinzel Decorative", "Cinzel", serif;
-  font-size: 1.15rem;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: 1.05rem;
   line-height: 1.2;
   color: var(--scroll-ink);
   font-weight: 700;

@@ -21,6 +21,8 @@ const FILE_BY_EVENT: Partial<Record<SoundEvent, string>> = {
   timer10: "/sounds/timer9.mp3",
 };
 
+const TIMER_CLOCK_PATH = "/sounds/timer-clock.mp3";
+
 let audioUnlocked = false;
 const pendingEvents: SoundEvent[] = [];
 const preloaded = new Map<string, HTMLAudioElement>();
@@ -36,7 +38,10 @@ export function isMuted(): boolean {
 
 export function setMuted(muted: boolean): void {
   localStorage.setItem(MUTE_STORAGE_KEY, muted ? "1" : "0");
-  if (muted) stopTimerWarning();
+  if (muted) {
+    stopTimerWarning();
+    stopTimerClock();
+  }
 }
 
 export function isAudioUnlocked(): boolean {
@@ -77,7 +82,7 @@ function flushPending(): void {
 export function unlockAudio(): void {
   audioUnlocked = true;
 
-  try {
+    try {
     for (const event of Object.keys(FILE_BY_EVENT) as SoundEvent[]) {
       const url = soundUrl(event);
       if (!url || preloaded.has(url)) continue;
@@ -85,6 +90,14 @@ export function unlockAudio(): void {
       audio.preload = "auto";
       preloaded.set(url, audio);
       void audio.load();
+    }
+
+    const clockUrl = assetUrl(TIMER_CLOCK_PATH);
+    if (!preloaded.has(clockUrl)) {
+      const clock = new Audio(clockUrl);
+      clock.preload = "auto";
+      preloaded.set(clockUrl, clock);
+      void clock.load();
     }
 
     // Silent play under the user gesture unlocks subsequent Audio.play() calls.
@@ -120,17 +133,47 @@ export function playSound(event: SoundEvent): void {
 }
 
 let timerWarningAudio: HTMLAudioElement | null = null;
+let timerClockAudio: HTMLAudioElement | null = null;
+
+/** Soft looping clock for the full question timer (before the last-seconds alert). */
+export function startTimerClock(): void {
+  if (isMuted()) return;
+  if (!audioUnlocked) return;
+  if (timerClockAudio) return;
+  const url = assetUrl(TIMER_CLOCK_PATH);
+  if (!url) return;
+  try {
+    const audio = new Audio(url);
+    audio.loop = true;
+    audio.volume = 0.35;
+    timerClockAudio = audio;
+    void audio.play().catch(() => {
+      timerClockAudio = null;
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+export function stopTimerClock(): void {
+  if (!timerClockAudio) return;
+  timerClockAudio.pause();
+  timerClockAudio.currentTime = 0;
+  timerClockAudio = null;
+}
 
 /** Looping clock for the last seconds of the question timer. */
 export function startTimerWarning(): void {
   if (isMuted()) return;
   if (!audioUnlocked) return;
   if (timerWarningAudio) return;
+  stopTimerClock();
   const url = soundUrl("timer10");
   if (!url) return;
   try {
     const audio = new Audio(url);
     audio.loop = true;
+    audio.volume = 0.85;
     timerWarningAudio = audio;
     void audio.play().catch(() => {
       timerWarningAudio = null;
@@ -153,4 +196,5 @@ export function __resetAudioForTests(): void {
   pendingEvents.length = 0;
   preloaded.clear();
   stopTimerWarning();
+  stopTimerClock();
 }

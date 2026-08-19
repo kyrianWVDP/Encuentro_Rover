@@ -1,6 +1,12 @@
 import { useEffect, useRef } from "react";
 import type { GameState } from "../game/turnReducer";
-import { playSound, startTimerWarning, stopTimerWarning } from "../game/sounds";
+import {
+  playSound,
+  startTimerClock,
+  stopTimerClock,
+  startTimerWarning,
+  stopTimerWarning,
+} from "../game/sounds";
 import { soundsForTransition } from "../game/soundTransitions";
 
 const TIMER_WARNING_SEC = 9;
@@ -17,13 +23,14 @@ export function useGameSounds(state: GameState): void {
     }
   }, [state]);
 
-  // Clock SFX on the projector for the last 9 seconds of a running question timer.
+  // Soft clock for most of the timer; stronger loop in the last TIMER_WARNING_SEC.
   useEffect(() => {
     const { timer, turn } = state;
     const inQuestion =
       turn.phase === "questionRunning" || turn.phase === "awaitingJudgement";
 
     if (!timer?.running || !timer.endsAt || !inQuestion) {
+      stopTimerClock();
       stopTimerWarning();
       return;
     }
@@ -31,10 +38,16 @@ export function useGameSounds(state: GameState): void {
     const endsAt = timer.endsAt;
     const tick = () => {
       const leftSec = Math.ceil(Math.max(0, endsAt - Date.now()) / 1000);
-      if (leftSec > 0 && leftSec <= TIMER_WARNING_SEC) {
+      if (leftSec <= 0) {
+        stopTimerClock();
+        stopTimerWarning();
+        return;
+      }
+      if (leftSec <= TIMER_WARNING_SEC) {
         startTimerWarning();
       } else {
         stopTimerWarning();
+        startTimerClock();
       }
     };
 
@@ -42,6 +55,7 @@ export function useGameSounds(state: GameState): void {
     const id = window.setInterval(tick, 200);
     return () => {
       window.clearInterval(id);
+      stopTimerClock();
       stopTimerWarning();
     };
   }, [state.timer?.running, state.timer?.endsAt, state.turn.phase]);

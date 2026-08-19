@@ -20,14 +20,14 @@ export function FinalScreen({
   showDownloadCsv = true,
 }: FinalScreenProps) {
   const ranking = useMemo(() => rankClans(scores, clans), [scores, clans]);
-  
-  const top1 = ranking.filter(r => r.puesto === 1).map(r => clans.find(c => c.id === r.clanId)!);
-  const top2 = ranking.filter(r => r.puesto === 2).map(r => clans.find(c => c.id === r.clanId)!);
-  const top3 = ranking.filter(r => r.puesto === 3).map(r => clans.find(c => c.id === r.clanId)!);
+
+  const top1 = ranking.filter((r) => r.puesto === 1).map((r) => clans.find((c) => c.id === r.clanId)!);
+  const top2 = ranking.filter((r) => r.puesto === 2).map((r) => clans.find((c) => c.id === r.clanId)!);
+  const top3 = ranking.filter((r) => r.puesto === 3).map((r) => clans.find((c) => c.id === r.clanId)!);
 
   const handleDownloadCsv = () => {
-    const rows = ranking.map(r => {
-      const clan = clans.find(c => c.id === r.clanId)!;
+    const rows = ranking.map((r) => {
+      const clan = clans.find((c) => c.id === r.clanId)!;
       return {
         clanId: r.clanId,
         puesto: r.puesto,
@@ -78,18 +78,18 @@ export function FinalScreen({
         {renderPodiumPlace(top1, 1)}
         {renderPodiumPlace(top3, 3)}
       </div>
-      
+
+      <div className="final-score-table">
+        <ScoreTable scores={scores} clans={clans} size="projector" showRank />
+      </div>
+
       {showDownloadCsv && (
         <div className="final-actions">
-          <button onClick={handleDownloadCsv} className="download-btn">
+          <button type="button" onClick={handleDownloadCsv} className="download-btn">
             Descargar CSV
           </button>
         </div>
       )}
-
-      <div className="final-score-table">
-        <ScoreTable scores={scores} clans={clans} topN={3} size="projector" />
-      </div>
     </div>
   );
 }

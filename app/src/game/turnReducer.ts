@@ -165,10 +165,13 @@ function proceedAfterTurn(state: GameState): GameState {
   }
 
   // Advance round only after the score table, so maxRounds / UI still show the finished round.
+  // Tiebreak never bumps roundNumber (Host shows Desempate instead).
   const clans = activeClans(state);
   let round = state.round;
-  if (state.roundScoresPending) {
+  if (state.roundScoresPending && state.mode === "regular") {
     round = advanceRoundIfComplete(round, clans.length);
+  } else if (state.mode === "tiebreak" && state.round.playedClanIds.length >= clans.length) {
+    round = { ...round, playedClanIds: [] };
   }
 
   const cleared: GameState = {
@@ -323,7 +326,8 @@ export function turnReducer(state: GameState, action: Action): GameState {
         let nextTiebreakClanIds = state.tiebreakClanIds;
         
         const isRoundComplete = round.playedClanIds.length >= clans.length;
-        // Defer advanceRoundIfComplete until ACK_SCORES so the finished round stays visible.
+        // Tiebreak: never show the projector scoreboard mid-desempate.
+        // Clear played clans for the next bout without bumping regular roundNumber.
         if (isRoundComplete && state.mode === "tiebreak") {
           const allClans = loadEventConfig().clans;
           const ranking = rankClans(newScores, allClans);
@@ -334,6 +338,7 @@ export function turnReducer(state: GameState, action: Action): GameState {
             nextTiebreakClanIds = null;
           } else {
             nextTiebreakClanIds = nextGroup;
+            round = { ...round, playedClanIds: [] };
           }
         }
 
@@ -367,7 +372,8 @@ export function turnReducer(state: GameState, action: Action): GameState {
           tiebreakClanIds: nextTiebreakClanIds,
           lastJudgement: state.pendingJudgement,
           pendingJudgement: null,
-          roundScoresPending: isRoundComplete,
+          // Regular phase still shows end-of-round scores; tiebreak does not.
+          roundScoresPending: isRoundComplete && state.mode === "regular",
           turn: { ...state.turn, phase: "revealAnswer" },
         };
       }

@@ -75,7 +75,7 @@ export function PublicScreen() {
     switch (phase) {
       case "idle":
         return (
-          <div className="public-content">
+          <div className="public-content public-content--wheel">
             <RouletteWheel
               clans={activeClans}
               playedClanIds={round.playedClanIds}
@@ -89,7 +89,7 @@ export function PublicScreen() {
 
       case "spinning":
         return (
-          <div className="public-content">
+          <div className="public-content public-content--wheel">
             <RouletteWheel
               clans={activeClans}
               playedClanIds={round.playedClanIds}
@@ -107,21 +107,27 @@ export function PublicScreen() {
           : null;
         if (!selectedClan) return null;
         return (
-          <div className="public-content clan-reveal-layout">
-            <FitToStage token={`reveal:${selectedClan.id}`}>
-              <div className="clan-reveal-hero">
-                <ClanAvatar
-                  nombre={selectedClan.nombre}
-                  logoUrl={selectedClan.logoUrl}
-                  color={selectedClan.color}
-                  size={160}
-                />
-                <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
-                {selectedClan.representante && (
-                  <p className="clan-representante">{selectedClan.representante}</p>
-                )}
-              </div>
-            </FitToStage>
+          <div className="public-content public-content--wheel clan-reveal-layout">
+            <RouletteWheel
+              clans={activeClans}
+              playedClanIds={round.playedClanIds}
+              rotationDeg={rotationDeg}
+              spinning={false}
+              selectedClanId={selectedClanId}
+              size="projector"
+            />
+            <div className="clan-reveal-caption">
+              <ClanAvatar
+                nombre={selectedClan.nombre}
+                logoUrl={selectedClan.logoUrl}
+                color={selectedClan.color}
+                size={72}
+              />
+              <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
+              {selectedClan.representante && (
+                <p className="clan-representante">{selectedClan.representante}</p>
+              )}
+            </div>
           </div>
         );
       }

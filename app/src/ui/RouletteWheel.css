@@ -79,9 +79,13 @@
 }
 
 .roulette-sector.selected .roulette-label {
-  box-shadow: 0 0 16px #f1c40f;
+  box-shadow: 0 0 22px #f1c40f, 0 0 8px #fff3a0;
   border-radius: 50%;
-  outline: 3px solid #f1c40f;
+  outline: 4px solid #f1c40f;
+  outline-offset: 2px;
+  background: rgba(241, 196, 15, 0.28);
+  transform: scale(1.12);
+  z-index: 3;
 }
 
 .roulette-label {
@@ -102,10 +106,11 @@
 }
 
 .roulette-container--projector {
-  /* Scales down on short / low-res projector displays */
-  width: min(500px, 62vmin);
-  height: min(500px, 62vmin);
+  /* Scales down on short / low-res projector displays; keep optically centered */
+  width: min(520px, 58vmin);
+  height: min(520px, 58vmin);
   margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .roulette-container--projector .roulette-pointer {
