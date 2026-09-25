@@ -50,11 +50,11 @@ export function isAudioUnlocked(): boolean {
 
 function getAudio(url: string): HTMLAudioElement {
   const cached = preloaded.get(url);
-  if (cached) {
-    const clone = cached.cloneNode(true) as HTMLAudioElement;
-    return clone;
-  }
-  return new Audio(url);
+  if (cached) return cached;
+  const audio = new Audio(url);
+  audio.preload = "auto";
+  preloaded.set(url, audio);
+  return audio;
 }
 
 function actuallyPlay(event: SoundEvent): void {
@@ -62,7 +62,8 @@ function actuallyPlay(event: SoundEvent): void {
   if (!url) return;
   try {
     const audio = getAudio(url);
-    audio.currentTime = 0;
+    audio.pause();
+    audio.currentTime = event === "spin" ? 0.15 : 0;
     void audio.play().catch(() => {
       /* still blocked — wait for unlock */
       if (!pendingEvents.includes(event)) pendingEvents.push(event);
@@ -172,8 +173,13 @@ export function startTimerWarning(): void {
   if (!url) return;
   try {
     const audio = new Audio(url);
-    audio.loop = true;
+    audio.loop = false;
     audio.volume = 0.85;
+    const cueBell = () => {
+      audio.currentTime = 6;
+    };
+    if (audio.readyState >= 1) cueBell();
+    else audio.addEventListener("loadedmetadata", cueBell, { once: true });
     timerWarningAudio = audio;
     void audio.play().catch(() => {
       timerWarningAudio = null;

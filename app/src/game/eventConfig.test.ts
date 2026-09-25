@@ -46,7 +46,7 @@ describe("eventConfig", () => {
 
   it("defaultEventConfig has CVDG title and seven people with photo paths", () => {
     const config = defaultEventConfig();
-    expect(config.titulo).toBe("25 años CVDG");
+    expect(config.titulo).toBe("Clan V Guardia de Dragones");
     expect(config.clans).toHaveLength(7);
     expect(config.clans.every((c) => c.representante === "")).toBe(true);
     expect(config.version).toBe(1);

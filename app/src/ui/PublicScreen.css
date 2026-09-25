@@ -13,11 +13,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #0c0e12;
-  background-image: var(--asset-encuentro-fondo);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  --poster: min(100vw, 78vh);
+  /* Emblem circle center, measured on the 1024px artwork */
+  --emblem-y: 0.39;
+  background-color: #fdfdfd;
+  background-image: none;
   color: #ffffff;
   overflow: hidden;
   box-sizing: border-box;
@@ -39,8 +39,24 @@
 .public-screen::before {
   content: "";
   position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--poster);
+  height: var(--poster);
+  transform: translate(-50%, -50%);
+  background-image: var(--asset-encuentro-fondo);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.public-screen::after {
+  content: "";
+  position: absolute;
   inset: 0;
-  background: rgba(10, 12, 16, 0.48);
+  background: transparent;
   pointer-events: none;
   z-index: 0;
 }
@@ -52,13 +68,13 @@
 
 .public-title-block {
   position: absolute;
-  top: calc(var(--projector-safe-y) + 0.35rem);
+  top: max(0.35rem, calc(50% - var(--poster) / 2 - 2.6rem));
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
   text-align: center;
   pointer-events: none;
-  max-width: min(92vw, 920px);
+  max-width: 98vw;
   padding: 0 1rem;
 }
 
@@ -75,15 +91,16 @@
 
 .public-title {
   margin: 0;
-  font-family: "UnifrakturCook", "Cinzel Decorative", serif;
+  font-family: "Cinzel", "Palatino Linotype", serif;
   font-weight: 700;
-  font-size: clamp(2rem, 5.5vw, 3.75rem);
-  line-height: 1.05;
-  letter-spacing: normal;
-  color: #f8f1d8;
+  font-size: clamp(1.7rem, 4.6vw, 3.4rem);
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  color: #e2c56a;
   text-shadow:
     0 2px 0 #3a2a10,
-    0 4px 18px rgba(0, 0, 0, 0.85);
+    0 4px 16px rgba(0, 0, 0, 0.8);
 }
 
 .public-title--tiebreak {
@@ -116,13 +133,58 @@
 
 .public-content--wheel {
   justify-content: center;
-  gap: 1rem;
-  padding-top: 2.5rem;
   box-sizing: border-box;
 }
 
-.clan-reveal-layout {
-  gap: 0.85rem;
+.public-content--wheel .roulette-container--projector {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + (var(--emblem-y) - 0.5) * var(--poster));
+  transform: translate(-50%, -50%);
+  width: calc(var(--poster) * 0.4);
+  height: calc(var(--poster) * 0.4);
+  z-index: 2;
+}
+
+.public-content--wheel .clan-reveal-caption {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + (var(--emblem-y) - 0.5) * var(--poster) + var(--poster) * 0.22);
+  transform: translateX(-50%);
+  z-index: 3;
+  background: rgba(12, 8, 6, 0.72);
+  border: 1px solid rgba(212, 175, 90, 0.45);
+  border-radius: 999px;
+  padding: 0.35rem 1rem 0.4rem;
+}
+
+.public-screen--picked::before {
+  opacity: 0.22;
+  filter: grayscale(0.35);
+}
+
+.public-screen--picked::after {
+  background: rgba(214, 24, 36, 0.9);
+}
+
+.public-screen--picked .public-content--wheel .clan-reveal-caption {
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.7rem 1.4rem 0.85rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.public-screen--picked .clan-reveal-name {
+  color: #1a1a1a;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  text-shadow: none;
+}
+
+.roulette-sector.selected .clan-avatar {
+  transform: scale(1.85);
+  box-shadow: 0 0 0 6px #fff, 0 14px 28px rgba(0, 0, 0, 0.45);
+  z-index: 4;
 }
 
 .clan-reveal-caption {
@@ -178,6 +240,53 @@
   display: none;
 }
 
+.public-screen--question::before {
+  opacity: 0.16;
+  filter: grayscale(0.45);
+}
+
+.public-screen--question::after {
+  background: rgba(122, 74, 12, 0.92);
+}
+
+.public-screen--question .question-scroll-roller {
+  display: none;
+}
+
+.public-screen--question .question-card {
+  background: #fff;
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  padding: 1.5rem 1.7rem 1.65rem;
+}
+
+.public-screen--question .question-label {
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a5a10;
+  text-shadow: none;
+}
+
+.public-screen--question .question-text {
+  color: #1a1a1a;
+  font-size: clamp(1.45rem, 3.2vw, 2.35rem);
+}
+
+.public-screen--question .clan-reveal-name {
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.public-screen--question .answer-block {
+  border-top-color: rgba(138, 90, 16, 0.28);
+}
+
+.public-screen--question .answer-text {
+  color: #6b4510;
+}
+
 .question-layout {
   gap: 0;
   justify-content: center;
@@ -185,6 +294,7 @@
   padding: 0.5rem;
   box-sizing: border-box;
   overflow: hidden;
+}
 }
 
 .fit-to-stage-shell {
@@ -332,24 +442,26 @@
 }
 
 .host-link-discrete {
-  color: rgba(255, 255, 255, 0.1);
+  color: rgba(26, 18, 12, 0.28);
   text-decoration: none;
   font-size: 0.8rem;
 }
 
 .host-link-discrete:hover {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(26, 18, 12, 0.7);
 }
 
 .audio-unlock-hint {
   position: absolute;
-  bottom: calc(var(--projector-safe-y) + 1.75rem);
+  bottom: 3.35rem;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.35);
   pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
 }
 
 .audio-unlock-btn {
@@ -440,7 +552,7 @@
 
 .host-bar {
   position: absolute;
-  bottom: calc(var(--projector-safe-y) + 2.5rem);
+  bottom: 0.45rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
@@ -449,7 +561,9 @@
   gap: 0.65rem;
   justify-content: center;
   max-width: min(96vw, 920px);
-  padding: 0 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(12, 14, 18, 0.78);
 }
 
 .host-bar button {
@@ -492,6 +606,29 @@
 
 .host-bar button:disabled:hover {
   filter: none;
+}
+
+.rounds-field {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-weight: 700;
+  color: #f8f1d8;
+}
+
+.rounds-field input {
+  width: 4.2rem;
+  padding: 0.45rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 197, 106, 0.55);
+  background: rgba(12, 14, 18, 0.92);
+  color: #e2c56a;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .host-bar .mute-toggle-btn.is-muted {

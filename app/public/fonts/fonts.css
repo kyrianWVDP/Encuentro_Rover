@@ -1,0 +1,71 @@
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./cinzel-500-latin-ext.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./cinzel-500-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./cinzel-700-latin-ext.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./cinzel-700-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./cinzeldecorative-700-latin-ext.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./cinzeldecorative-700-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./cinzeldecorative-900-latin-ext.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./cinzeldecorative-900-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'UnifrakturCook';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./unifrakturcook-700-latin.woff2') format('woff2');
+}

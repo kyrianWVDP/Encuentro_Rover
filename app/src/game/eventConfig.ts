@@ -67,7 +67,7 @@ const DEFAULT_CLANS: ClanConfig[] = [
 export function defaultEventConfig(): EventConfig {
   return {
     version: 1,
-    titulo: "25 años CVDG",
+    titulo: "Clan V Guardia de Dragones",
     maxRounds: 10,
     timerSec: 60,
     clans: DEFAULT_CLANS.map((clan) => ({ ...clan })),
@@ -94,6 +94,11 @@ export function loadEventConfig(): EventConfig {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isEventConfig(parsed)) return defaultEventConfig();
+    if (parsed.titulo === "25 años CVDG") {
+      const updated = { ...parsed, titulo: defaultEventConfig().titulo };
+      saveEventConfig(updated);
+      return updated;
+    }
     return parsed;
   } catch {
     return defaultEventConfig();

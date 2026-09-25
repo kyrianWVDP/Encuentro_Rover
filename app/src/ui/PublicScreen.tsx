@@ -6,7 +6,7 @@ import type { Action, GameState } from "../game/turnReducer";
 import { RouletteWheel } from "./RouletteWheel";
 import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
-import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
+import { loadEventConfig, saveEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
 import { ClanAvatar } from "./ClanAvatar";
@@ -165,6 +165,25 @@ export function PublicScreen() {
 
     return (
       <div className="host-bar">
+        {phase === "idle" && round.roundNumber === 1 && round.playedClanIds.length === 0 && (
+          <label className="rounds-field">
+            Rondas
+            <input
+              type="number"
+              min={1}
+              value={gameState.maxRounds}
+              onChange={(e) => {
+                const rounds = Math.max(1, Number(e.target.value) || 1);
+                saveEventConfig({ ...loadEventConfig(), maxRounds: rounds });
+                setGameState((prev) => {
+                  const next = { ...prev, maxRounds: rounds };
+                  publishGameState(next);
+                  return next;
+                });
+              }}
+            />
+          </label>
+        )}
         {phase === "idle" && (
           <button
             type="button"
@@ -304,7 +323,7 @@ export function PublicScreen() {
                 nombre={selectedClan.nombre}
                 logoUrl={selectedClan.logoUrl}
                 color={selectedClan.color}
-                size={72}
+                size={160}
               />
               <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
             </div>
@@ -396,7 +415,7 @@ export function PublicScreen() {
 
   return (
     <main
-      className={`public-screen${mode === "final" ? " public-screen--final" : ""}${hidePageTitle && mode !== "tiebreak" ? " public-screen--scores" : ""}${mode === "tiebreak" ? " public-screen--tiebreak" : ""}`}
+      className={`public-screen${mode === "final" ? " public-screen--final" : ""}${phase === "clanRevealed" ? " public-screen--picked" : ""}${phase === "questionRunning" || phase === "awaitingJudgement" || phase === "revealAnswer" ? " public-screen--question" : ""}${hidePageTitle && mode !== "tiebreak" ? " public-screen--scores" : ""}${mode === "tiebreak" ? " public-screen--tiebreak" : ""}`}
       onPointerDown={handleFirstInteraction}
       onKeyDown={handleFirstInteraction}
     >

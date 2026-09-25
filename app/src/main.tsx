@@ -5,8 +5,8 @@ import App from './App.tsx'
 import { assetUrl } from './game/assetUrl'
 
 const rootStyle = document.documentElement.style
-rootStyle.setProperty('--asset-encuentro-fondo', `url(${assetUrl('encuentro-fondo.jpg')})`)
-rootStyle.setProperty('--asset-ruleta-fondo', `url(${assetUrl('ruleta-fondo.jpg')})`)
+rootStyle.setProperty('--asset-encuentro-fondo', `url(${assetUrl('encuentro-fondo.jpg')}?v=2)`)
+rootStyle.setProperty('--asset-ruleta-fondo', `url(${assetUrl('ruleta-badge.png')})`)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
