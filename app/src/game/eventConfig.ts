@@ -17,63 +17,57 @@ export type EventConfig = {
   questions: Question[] | null;
 };
 
-export const EVENT_STORAGE_KEY = "justas-event-v1";
+export const EVENT_STORAGE_KEY = "cvdg-event-v1";
 
 const DEFAULT_CLANS: ClanConfig[] = [
   {
-    id: "guardia-dragones",
-    nombre: "V Guardia de Dragones",
+    id: "aracely-aranda",
+    nombre: "Aracely Aranda",
     representante: "",
-    logoUrl: "/logos/guardia-dragones.png",
+    logoUrl: "/people/aracely-aranda.jpg",
   },
   {
-    id: "humaita-ps15",
-    nombre: "Humaita PS15",
+    id: "vania-carreras",
+    nombre: "Vania Carreras",
     representante: "",
-    logoUrl: "/logos/humaita-ps15.png",
+    logoUrl: "/people/vania-carreras.jpg",
   },
   {
-    id: "chaco-boreal",
-    nombre: "Chaco Boreal",
+    id: "micaela-chavez",
+    nombre: "Micaela Chavez",
     representante: "",
-    logoUrl: "/logos/chaco-boreal.png",
+    logoUrl: "/people/micaela-chavez.jpg",
   },
   {
-    id: "orden-san-jorge",
-    nombre: "La Orden de San Jorge",
+    id: "javier-diaz",
+    nombre: "Javier Diaz",
     representante: "",
-    logoUrl: "/logos/orden-san-jorge.png",
+    logoUrl: "/people/javier-diaz.jpg",
   },
   {
-    id: "kurusu-peregrino",
-    nombre: "Kurusu Peregrino",
+    id: "maia-martinez",
+    nombre: "Maia Martinez",
     representante: "",
-    logoUrl: "/logos/kurusu-peregrino.png",
+    logoUrl: "/people/maia-martinez.jpg",
   },
   {
-    id: "humaita-cf1",
-    nombre: "Humaita CF1",
+    id: "eric-vazquez",
+    nombre: "Eric Vazquez",
     representante: "",
-    logoUrl: "/logos/humaita-cf1.png",
+    logoUrl: "/people/eric-vazquez.jpg",
   },
   {
-    id: "san-jorge-capadocia",
-    nombre: "San Jorge de Capadocia",
+    id: "kyrian-weiss",
+    nombre: "Kyrian Weiss",
     representante: "",
-    logoUrl: "/logos/san-jorge-capadocia.png",
-  },
-  {
-    id: "yvy-pyta",
-    nombre: "Yvy Pytã",
-    representante: "",
-    logoUrl: "/logos/yvy-pyta.png",
+    logoUrl: "/people/kyrian-weiss.jpg",
   },
 ];
 
 export function defaultEventConfig(): EventConfig {
   return {
     version: 1,
-    titulo: "Justas del Saber",
+    titulo: "25 años CVDG",
     maxRounds: 10,
     timerSec: 60,
     clans: DEFAULT_CLANS.map((clan) => ({ ...clan })),

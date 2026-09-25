@@ -144,15 +144,16 @@ describe("turnReducer", () => {
     expect(s.turn.selectedQuestionId).toBeNull();
   });
 
-  it("advances round after 8 complete cycles", () => {
+  it("advances round after all clans complete a cycle", () => {
     let s = initialGameState();
-    for (let i = 0; i < 8; i++) {
+    const clanCount = CLANS.length;
+    for (let i = 0; i < clanCount; i++) {
       s = turnReducer(s, { type: "SPIN", rng: () => 0 });
       s = turnReducer(s, { type: "SPIN_FINISHED" });
       s = turnReducer(s, { type: "START_QUESTION", rng: () => 0 });
       s = turnReducer(s, { type: "REQUEST_JUDGE", judgement: "incorrect" });
       s = turnReducer(s, { type: "CONFIRM_JUDGE" });
-      const isLastOfRound = i === 7;
+      const isLastOfRound = i === clanCount - 1;
       expect(s.roundScoresPending).toBe(isLastOfRound);
       s = turnReducer(s, { type: "ACK_REVEAL" });
       if (isLastOfRound) {

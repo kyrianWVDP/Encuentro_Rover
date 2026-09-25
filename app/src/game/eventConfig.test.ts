@@ -25,38 +25,40 @@ globalThis.localStorage = {
   length: 0,
 };
 
+const EXPECTED_IDS = [
+  "aracely-aranda",
+  "vania-carreras",
+  "micaela-chavez",
+  "javier-diaz",
+  "maia-martinez",
+  "eric-vazquez",
+  "kyrian-weiss",
+] as const;
+
 describe("eventConfig", () => {
   beforeEach(() => {
     store.clear();
   });
 
   it("exports EVENT_STORAGE_KEY", () => {
-    expect(EVENT_STORAGE_KEY).toBe("justas-event-v1");
+    expect(EVENT_STORAGE_KEY).toBe("cvdg-event-v1");
   });
 
-  it("defaultEventConfig has 8 clans with logo paths", () => {
+  it("defaultEventConfig has CVDG title and seven people with photo paths", () => {
     const config = defaultEventConfig();
-    expect(config.clans).toHaveLength(8);
-    expect(config.clans.every((c) => c.logoUrl?.startsWith("/logos/"))).toBe(
-      true,
-    );
+    expect(config.titulo).toBe("25 años CVDG");
+    expect(config.clans).toHaveLength(7);
     expect(config.clans.every((c) => c.representante === "")).toBe(true);
     expect(config.version).toBe(1);
     expect(config.questions).toBeNull();
+    for (const clan of config.clans) {
+      expect(clan.logoUrl).toBe(`/people/${clan.id}.jpg`);
+    }
   });
 
-  it("defaultEventConfig clan ids match known slugs", () => {
+  it("defaultEventConfig clan ids match CVDG roster", () => {
     const ids = defaultEventConfig().clans.map((c) => c.id);
-    expect(ids).toEqual([
-      "guardia-dragones",
-      "humaita-ps15",
-      "chaco-boreal",
-      "orden-san-jorge",
-      "kurusu-peregrino",
-      "humaita-cf1",
-      "san-jorge-capadocia",
-      "yvy-pyta",
-    ]);
+    expect(ids).toEqual([...EXPECTED_IDS]);
   });
 
   it("round-trips EventConfig through localStorage", () => {

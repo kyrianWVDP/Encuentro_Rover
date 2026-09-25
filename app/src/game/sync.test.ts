@@ -64,7 +64,7 @@ describe("sync", () => {
   });
 
   it("exports expected constants", () => {
-    expect(STORAGE_KEY).toBe("justas-game-v1");
+    expect(STORAGE_KEY).toBe("cvdg-game-v1");
     expect(CHANNEL_NAME).toBe("justas-del-saber");
   });
 

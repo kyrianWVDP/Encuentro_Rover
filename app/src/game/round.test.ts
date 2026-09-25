@@ -17,7 +17,7 @@ describe("round", () => {
   it("lists pending excluding played", () => {
     const state = markClanPlayed(empty, CLANS[0].id);
     const pending = getPendingClans(CLANS, state.playedClanIds);
-    expect(pending).toHaveLength(7);
+    expect(pending).toHaveLength(CLANS.length - 1);
     expect(pending.map((c) => c.id)).not.toContain(CLANS[0].id);
   });
 

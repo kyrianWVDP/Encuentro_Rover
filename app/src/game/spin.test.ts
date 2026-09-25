@@ -21,14 +21,20 @@ describe("pickClan", () => {
 });
 
 describe("angleForClanIndex", () => {
-  it("uses 45° sectors", () => {
-    expect(angleForClanIndex(0, 45)).toBe(0);
-    expect(angleForClanIndex(1, 45)).toBe(45);
-    expect(angleForClanIndex(7, 45)).toBe(315);
+  const sectorDegrees = 360 / CLANS.length;
+
+  it("uses equal sectors for the active clan count", () => {
+    expect(angleForClanIndex(0, sectorDegrees)).toBe(0);
+    expect(angleForClanIndex(1, sectorDegrees)).toBe(sectorDegrees);
+    expect(angleForClanIndex(CLANS.length - 1, sectorDegrees)).toBe(
+      sectorDegrees * (CLANS.length - 1),
+    );
   });
 
   it("maps each clan to a distinct sector", () => {
-    const angles = CLANS.map((c) => angleForClanIndex(clanSectorIndex(c.id), 45));
-    expect(new Set(angles).size).toBe(8);
+    const angles = CLANS.map((c) =>
+      angleForClanIndex(clanSectorIndex(c.id), sectorDegrees),
+    );
+    expect(new Set(angles).size).toBe(CLANS.length);
   });
 });

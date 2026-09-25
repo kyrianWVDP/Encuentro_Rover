@@ -1,6 +1,6 @@
 import type { GameState } from "./turnReducer";
 
-export const STORAGE_KEY = "justas-game-v1";
+export const STORAGE_KEY = "cvdg-game-v1";
 export const CHANNEL_NAME = "justas-del-saber";
 
 let channel: BroadcastChannel | null = null;
