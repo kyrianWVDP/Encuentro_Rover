@@ -1,33 +1,90 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
-import { loadGameState, subscribeGameState } from "../game/sync";
-import { initialGameState } from "../game/turnReducer";
-import type { GameState } from "../game/turnReducer";
+import { publishGameState, loadGameState, subscribeGameState } from "../game/sync";
+import { turnReducer, initialGameState } from "../game/turnReducer";
+import type { Action, GameState } from "../game/turnReducer";
 import { RouletteWheel } from "./RouletteWheel";
 import { ScoreTable } from "./ScoreTable";
 import { TimerDisplay } from "./TimerDisplay";
-import { canShowAnswer } from "../game/selectors";
 import { loadEventConfig, getActiveQuestions } from "../game/eventConfig";
 import { QUESTIONS } from "../game/questions";
 import { FinalScreen } from "./FinalScreen";
 import { ClanAvatar } from "./ClanAvatar";
 import { FitToStage } from "./FitToStage";
+import { ConfirmModal } from "./ConfirmModal";
 import { useGameSounds } from "./useGameSounds";
 import { unlockAudio, isMuted, setMuted } from "../game/sounds";
+import { SPIN_DURATION_MS } from "../game/spin";
 import "./PublicScreen.css";
 
 export function PublicScreen() {
   const [gameState, setGameState] = useState<GameState>(() => {
     return loadGameState() ?? initialGameState();
   });
+  const [now, setNow] = useState(Date.now());
 
   const config = useMemo(() => loadEventConfig(), []);
   const clans = config.clans;
   const activeQuestions = useMemo(() => getActiveQuestions(config, QUESTIONS), [config]);
 
+  const dispatch = (action: Action) => {
+    setGameState((prev) => {
+      const next = turnReducer(prev, action);
+      publishGameState(next);
+      return next;
+    });
+  };
+
   useEffect(() => {
     return subscribeGameState(setGameState);
   }, []);
+
+  // Apply event maxRounds / timerSec to the live game (config is source of truth).
+  useEffect(() => {
+    const eventConfig = loadEventConfig();
+    setGameState((prev) => {
+      if (
+        prev.maxRounds === eventConfig.maxRounds &&
+        prev.timerSec === eventConfig.timerSec
+      ) {
+        return prev;
+      }
+      const next = {
+        ...prev,
+        maxRounds: eventConfig.maxRounds,
+        timerSec: eventConfig.timerSec,
+      };
+      publishGameState(next);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    let frame: number;
+    const tick = () => {
+      setNow(Date.now());
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (gameState.turn.phase === "spinning") {
+      const t = window.setTimeout(() => {
+        dispatch({ type: "SPIN_FINISHED" });
+      }, SPIN_DURATION_MS);
+      return () => clearTimeout(t);
+    }
+  }, [gameState.turn.phase, gameState.rotationDeg]);
+
+  useEffect(() => {
+    if (gameState.timer?.running && gameState.timer.endsAt) {
+      if (now >= gameState.timer.endsAt) {
+        dispatch({ type: "STOP_TIMER", nowMs: now });
+      }
+    }
+  }, [gameState.timer?.running, gameState.timer?.endsAt, now]);
 
   useGameSounds(gameState);
 
@@ -44,12 +101,25 @@ export function PublicScreen() {
     enableAudio();
   };
 
-  const { turn, round, scores, timer, rotationDeg, regularComplete, mode, tiebreakClanIds, lastJudgement } = gameState;
+  const {
+    turn,
+    round,
+    scores,
+    timer,
+    rotationDeg,
+    regularComplete,
+    mode,
+    tiebreakClanIds,
+    lastJudgement,
+    pendingJudgement,
+    error,
+  } = gameState;
   const { phase, selectedClanId, selectedQuestionId } = turn;
+  const canSpin = clans.length >= 2;
 
   const activeClans = useMemo(() => {
     if (mode === "tiebreak" && tiebreakClanIds) {
-      return clans.filter(c => tiebreakClanIds.includes(c.id));
+      return clans.filter((c) => tiebreakClanIds.includes(c.id));
     }
     return clans;
   }, [mode, tiebreakClanIds, clans]);
@@ -57,6 +127,106 @@ export function PublicScreen() {
   const question = selectedQuestionId
     ? activeQuestions.find((q) => q.id === selectedQuestionId)
     : null;
+
+  const showAnswer = phase === "revealAnswer";
+
+  const handleConfirmJudge = () => {
+    dispatch({ type: "CONFIRM_JUDGE" });
+  };
+
+  const handleCancelJudge = () => {
+    dispatch({ type: "CANCEL_JUDGE" });
+  };
+
+  const renderHostBar = () => {
+    if (mode === "final") return null;
+
+    if (regularComplete && mode === "regular") {
+      return (
+        <div className="host-bar">
+          <button type="button" onClick={() => dispatch({ type: "BEGIN_FINALE" })}>
+            Continuar
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="host-bar">
+        {phase === "idle" && (
+          <button
+            type="button"
+            onClick={() => dispatch({ type: "SPIN" })}
+            disabled={!canSpin}
+          >
+            Girar
+          </button>
+        )}
+        {phase === "clanRevealed" && (
+          <>
+            <button type="button" onClick={() => dispatch({ type: "RESPIN" })}>
+              Volver a girar
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "START_QUESTION", nowMs: Date.now() })}
+            >
+              Empezar pregunta
+            </button>
+          </>
+        )}
+        {(phase === "questionRunning" || phase === "awaitingJudgement") && (
+          <>
+            {phase === "questionRunning" && (
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "STOP_TIMER", nowMs: Date.now() })}
+              >
+                Parar timer
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "RESTART_TIMER", nowMs: Date.now() })}
+            >
+              Reiniciar timer
+            </button>
+            <button type="button" onClick={() => dispatch({ type: "ABORT_TURN_RESPIN" })}>
+              Anular y girar
+            </button>
+            <button
+              type="button"
+              className="correct-btn"
+              onClick={() =>
+                dispatch({ type: "REQUEST_JUDGE", judgement: "correct", nowMs: Date.now() })
+              }
+            >
+              Correcto
+            </button>
+            <button
+              type="button"
+              className="incorrect-btn"
+              onClick={() =>
+                dispatch({ type: "REQUEST_JUDGE", judgement: "incorrect", nowMs: Date.now() })
+              }
+            >
+              Incorrecto
+            </button>
+          </>
+        )}
+        {phase === "revealAnswer" && (
+          <button type="button" onClick={() => dispatch({ type: "ACK_REVEAL" })}>
+            Continuar
+          </button>
+        )}
+        {phase === "showScores" && (
+          <button type="button" onClick={() => dispatch({ type: "ACK_SCORES" })}>
+            Siguiente
+          </button>
+        )}
+      </div>
+    );
+  };
 
   const renderContent = () => {
     if (mode === "final") {
@@ -124,9 +294,6 @@ export function PublicScreen() {
                 size={72}
               />
               <h2 className="clan-reveal-name">{selectedClan.nombre}</h2>
-              {selectedClan.representante && (
-                <p className="clan-representante">{selectedClan.representante}</p>
-              )}
             </div>
           </div>
         );
@@ -141,7 +308,7 @@ export function PublicScreen() {
         return (
           <div className="public-content question-layout">
             <FitToStage
-              token={`q:${phase}:${selectedQuestionId ?? ""}:${canShowAnswer(phase)}:${selectedClanId ?? ""}`}
+              token={`q:${phase}:${selectedQuestionId ?? ""}:${showAnswer}:${selectedClanId ?? ""}`}
             >
               {selectedClan && (
                 <div className="clan-question-header">
@@ -160,7 +327,7 @@ export function PublicScreen() {
                   <div className="question-card">
                     <p className="question-label">Pregunta</p>
                     <h2 className="question-text">{question.texto}</h2>
-                    {canShowAnswer(phase) && (
+                    {showAnswer && (
                       <div className="answer-block">
                         <p className="answer-label">Respuesta oficial</p>
                         <p className="answer-text">{question.respuestaCorrecta}</p>
@@ -222,7 +389,6 @@ export function PublicScreen() {
     >
       {showEventTitle && (
         <header className="public-title-block">
-          <p className="public-title-eyebrow">Encuentro Nacional de Rovers · 2026</p>
           <h1 className="public-title">{config.titulo}</h1>
         </header>
       )}
@@ -231,6 +397,11 @@ export function PublicScreen() {
           <p className="public-title-eyebrow">Desempate</p>
           <h1 className="public-title public-title--tiebreak">Mata-mata</h1>
         </header>
+      )}
+      {error && (
+        <div className="public-error-banner" role="alert">
+          Error: {error}
+        </div>
       )}
       {!audioReady && (
         <button
@@ -242,14 +413,21 @@ export function PublicScreen() {
         </button>
       )}
       {renderContent()}
+      {renderHostBar()}
       <div className="bottom-links">
-        <Link to="/host" className="host-link-discrete">
-          Host
-        </Link>
         <Link to="/setup" className="host-link-discrete">
           Setup
         </Link>
       </div>
+      <ConfirmModal
+        open={pendingJudgement !== null}
+        title="Confirmar Juicio"
+        message={`¿Estás seguro de marcar la respuesta como ${
+          pendingJudgement === "correct" ? "CORRECTA (+10 pts)" : "INCORRECTA (0 pts)"
+        }?`}
+        onConfirm={handleConfirmJudge}
+        onCancel={handleCancelJudge}
+      />
     </main>
   );
 }

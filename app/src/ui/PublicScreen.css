@@ -437,3 +437,75 @@
   color: #ccc;
   font-style: italic;
 }
+
+.host-bar {
+  position: absolute;
+  bottom: calc(var(--projector-safe-y) + 2.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  max-width: min(96vw, 920px);
+  padding: 0 0.5rem;
+}
+
+.host-bar button {
+  padding: 0.7rem 1.2rem;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-weight: 700;
+  border: 1px solid rgba(241, 196, 15, 0.45);
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(12, 14, 18, 0.88);
+  color: #f8f1d8;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.host-bar button:hover {
+  filter: brightness(1.12);
+}
+
+.host-bar button:active {
+  transform: scale(0.98);
+}
+
+.host-bar button.correct-btn {
+  border-color: rgba(79, 181, 115, 0.65);
+  color: #b8f0c8;
+}
+
+.host-bar button.incorrect-btn {
+  border-color: rgba(224, 90, 80, 0.65);
+  color: #ffc4be;
+}
+
+.host-bar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.host-bar button:disabled:hover {
+  filter: none;
+}
+
+.public-error-banner {
+  position: absolute;
+  top: calc(var(--projector-safe-y) + 0.25rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  max-width: min(92vw, 640px);
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  background: rgba(120, 30, 24, 0.92);
+  color: #ffe8e6;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: 0.95rem;
+  text-align: center;
+}

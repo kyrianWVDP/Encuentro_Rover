@@ -15,9 +15,7 @@ import "./SetupScreen.css";
 const KNOWN_LOGOS = [
   "/logos/guardia-dragones.png",
   "/logos/humaita-ps15.png",
-  "/logos/chaco-boreal.png",
   "/logos/orden-san-jorge.png",
-  "/logos/kurusu-peregrino.png",
   "/logos/humaita-cf1.png",
   "/logos/san-jorge-capadocia.png",
   "/logos/yvy-pyta.png",
@@ -65,7 +63,7 @@ export function SetupScreen() {
   const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 
   const handleAddClan = () => {
-    const baseNombre = "Nuevo Clan";
+    const baseNombre = "Nueva persona";
     const randomShort = Math.random().toString(36).substring(2, 6);
     const newClan: ClanConfig = {
       id: `${slugify(baseNombre)}-${randomShort}`,
@@ -78,7 +76,7 @@ export function SetupScreen() {
 
   const handleRemoveClan = (id: string) => {
     if (config.clans.length <= 2) {
-      alert("No se pueden tener menos de 2 clanes.");
+      alert("No se pueden tener menos de 2 personas.");
       return;
     }
     setConfig({
@@ -119,7 +117,7 @@ export function SetupScreen() {
     saveEventConfig(config); // Always save latest changes first
     publishGameState(initialGameStateFromConfig(config));
     setResetConfirmOpen(false);
-    navigate("/host");
+    navigate("/");
   };
 
   return (
@@ -127,14 +125,13 @@ export function SetupScreen() {
       <header className="setup-header">
         <h1>Configuración del Evento</h1>
         <div className="setup-nav">
-          <Link to="/host" className="nav-btn">Ir al Host</Link>
-          <Link to="/" className="nav-btn">Ir al Público</Link>
+          <Link to="/" className="nav-btn">Ir al juego</Link>
         </div>
       </header>
 
       {config.clans.length < 2 && (
         <div className="error-banner">
-          Error: Se necesitan al menos 2 clanes para jugar.
+          Error: Se necesitan al menos 2 personas para jugar.
         </div>
       )}
 
@@ -186,8 +183,8 @@ export function SetupScreen() {
 
         <section className="setup-section clans-section">
           <div className="clans-header">
-            <h2>Clanes ({config.clans.length})</h2>
-            <button className="add-btn" onClick={handleAddClan}>+ Agregar Clan</button>
+            <h2>Personas ({config.clans.length})</h2>
+            <button className="add-btn" onClick={handleAddClan}>+ Agregar persona</button>
           </div>
           
           <div className="clans-list">
@@ -198,28 +195,22 @@ export function SetupScreen() {
                 <div className="clan-inputs">
                   <input
                     type="text"
-                    placeholder="Nombre del Clan"
+                    placeholder="Nombre de la persona"
                     value={clan.nombre}
                     onChange={(e) => handleClanChange(clan.id, "nombre", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Representante (opcional)"
-                    value={clan.representante}
-                    onChange={(e) => handleClanChange(clan.id, "representante", e.target.value)}
                   />
                   <select
                     value={clan.logoUrl ?? ""}
                     onChange={(e) => handleClanChange(clan.id, "logoUrl", e.target.value === "" ? null : e.target.value)}
                   >
-                    <option value="">Sin logo (iniciales)</option>
+                    <option value="">Sin foto (iniciales)</option>
                     {KNOWN_LOGOS.map((path) => (
                       <option key={path} value={path}>{path.replace("/logos/", "")}</option>
                     ))}
                   </select>
                 </div>
                 
-                <button className="remove-btn" onClick={() => handleRemoveClan(clan.id)} title="Eliminar Clan">✕</button>
+                <button className="remove-btn" onClick={() => handleRemoveClan(clan.id)} title="Eliminar persona">✕</button>
               </div>
             ))}
           </div>
