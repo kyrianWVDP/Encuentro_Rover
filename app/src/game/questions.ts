@@ -35,7 +35,7 @@ export const QUESTIONS: Question[] = [
   {
     id: 7,
     texto: "¿Qué significa “remar la propia canoa”?",
-    respuestaCorrecta: "Dirigir responsablemente la propia vida, elegir un camino y no esperar que otras personas tomen todas",
+    respuestaCorrecta: "Dirigir responsablemente la propia vida, elegir un camino y no esperar que otras personas tomen todas las decisiones.",
   },
   {
     id: 8,

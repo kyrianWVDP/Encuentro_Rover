@@ -112,6 +112,15 @@ def main() -> None:
     qs = parse_pdf(PDF_DEST)
     print(f"Parsed {len(qs)} questions")
 
+    # PDF extraction truncates id 7; keep the full canonical sentence.
+    for q in qs:
+        if q["id"] == 7:
+            q["respuestaCorrecta"] = (
+                "Dirigir responsablemente la propia vida, elegir un camino "
+                "y no esperar que otras personas tomen todas las decisiones."
+            )
+            break
+
     write_ts(qs, OUT_TS)
     print(f"Wrote {OUT_TS}")
 

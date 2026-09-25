@@ -21,7 +21,6 @@ export function PublicScreen() {
   const [gameState, setGameState] = useState<GameState>(() => {
     return loadGameState() ?? initialGameState();
   });
-  const [now, setNow] = useState(Date.now());
 
   const config = useMemo(() => loadEventConfig(), []);
   const clans = config.clans;
@@ -60,16 +59,6 @@ export function PublicScreen() {
   }, []);
 
   useEffect(() => {
-    let frame: number;
-    const tick = () => {
-      setNow(Date.now());
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  useEffect(() => {
     if (gameState.turn.phase === "spinning") {
       const t = window.setTimeout(() => {
         dispatch({ type: "SPIN_FINISHED" });
@@ -79,12 +68,16 @@ export function PublicScreen() {
   }, [gameState.turn.phase, gameState.rotationDeg]);
 
   useEffect(() => {
-    if (gameState.timer?.running && gameState.timer.endsAt) {
-      if (now >= gameState.timer.endsAt) {
-        dispatch({ type: "STOP_TIMER", nowMs: now });
-      }
+    if (!gameState.timer?.running || !gameState.timer.endsAt) {
+      return;
     }
-  }, [gameState.timer?.running, gameState.timer?.endsAt, now]);
+    const endsAt = gameState.timer.endsAt;
+    const delay = Math.max(0, endsAt - Date.now());
+    const t = window.setTimeout(() => {
+      dispatch({ type: "STOP_TIMER", nowMs: Date.now() });
+    }, delay);
+    return () => clearTimeout(t);
+  }, [gameState.timer?.running, gameState.timer?.endsAt]);
 
   useGameSounds(gameState);
 

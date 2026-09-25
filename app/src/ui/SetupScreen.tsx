@@ -13,12 +13,13 @@ import { ConfirmModal } from "./ConfirmModal";
 import "./SetupScreen.css";
 
 const KNOWN_LOGOS = [
-  "/logos/guardia-dragones.png",
-  "/logos/humaita-ps15.png",
-  "/logos/orden-san-jorge.png",
-  "/logos/humaita-cf1.png",
-  "/logos/san-jorge-capadocia.png",
-  "/logos/yvy-pyta.png",
+  "/people/aracely-aranda.jpg",
+  "/people/vania-carreras.jpg",
+  "/people/micaela-chavez.jpg",
+  "/people/javier-diaz.jpg",
+  "/people/maia-martinez.jpg",
+  "/people/eric-vazquez.jpg",
+  "/people/kyrian-weiss.jpg",
 ];
 
 export function SetupScreen() {
@@ -205,7 +206,7 @@ export function SetupScreen() {
                   >
                     <option value="">Sin foto (iniciales)</option>
                     {KNOWN_LOGOS.map((path) => (
-                      <option key={path} value={path}>{path.replace("/logos/", "")}</option>
+                      <option key={path} value={path}>{path.replace("/people/", "")}</option>
                     ))}
                   </select>
                 </div>
