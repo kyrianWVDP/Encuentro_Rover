@@ -199,7 +199,7 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
           <thead>
             <tr>
               {showRank && <th className="rank-cell">#</th>}
-              <th>Clan</th>
+              <th>Persona</th>
               <th>Puntos</th>
             </tr>
           </thead>

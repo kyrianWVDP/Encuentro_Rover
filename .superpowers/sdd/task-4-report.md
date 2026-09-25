@@ -1,81 +1,80 @@
-# Task 4 Report: turnReducer (TDD)
+# Task 4 Report: One screen
 
-## Status
+**Status:** DONE  
+**Commit:** `dec6e09` — feat: play the quiz on one screen  
+**HEAD before start:** `34cb25b`
 
-**DONE**
+## What was done
 
-## Summary
+1. **Host controls on `PublicScreen`**
+   - `PublicScreen` now owns dispatch + `publishGameState` (same actions as HostScreen).
+   - Added spin-finished and timer-expiry effects so the show advances without `/host`.
+   - Host bar by phase (spec §3 labels):
+     - idle → Girar (disabled when roster &lt; 2)
+     - clanRevealed → Volver a girar, Empezar pregunta
+     - questionRunning → Parar timer, Reiniciar timer, Anular y girar, Correcto, Incorrecto
+     - awaitingJudgement → Reiniciar timer, Anular y girar, Correcto, Incorrecto
+     - revealAnswer → Continuar
+     - showScores → Siguiente
+     - regularComplete → Continuar (`BEGIN_FINALE`)
+   - Confirm modal still gates Correcto/Incorrecto before `CONFIRM_JUDGE`.
+   - `question.respuestaCorrecta` renders only when `phase === "revealAnswer"` (not on showScores).
 
-Implemented turn state machine reducer under `app/src/game/` using TDD. All 13 tests pass (4 new + 9 existing).
+2. **Eyebrow / persona copy**
+   - Removed “Encuentro Nacional de Rovers · 2026”; title is `config.titulo`.
+   - Removed representante line from the reveal caption.
+   - Setup: “Nueva persona”, alerts/section say persona, nav goes to `/` as “Ir al juego”.
 
-## TDD Evidence
+3. **`/host` redirect**
+   - `App.tsx`: `/host` → `<Navigate to="/" replace />`; HostScreen import removed (file left unused).
 
-### RED (Step 2)
+4. **Styles**
+   - Host bar + error banner styles in `PublicScreen.css`.
 
-Created `turnReducer.test.ts` only, then:
+## Files committed
 
-```text
-npm test
-→ exit 1
-Error: Cannot find module './turnReducer' imported from .../turnReducer.test.ts
-Test Files  1 failed | 3 passed (4)
-Tests  9 passed (9)
+| Path | Change |
+|------|--------|
+| `app/src/ui/PublicScreen.tsx` | Dispatch, host bar, confirm modal, answer gate, no eyebrow |
+| `app/src/ui/PublicScreen.css` | Host bar / error banner |
+| `app/src/App.tsx` | `/host` redirects to `/` |
+| `app/src/ui/SetupScreen.tsx` | Persona labels; navigate to `/` after reset |
+
+## Tests
+
+```
+Test Files  16 passed (16)
+Tests       91 passed (91)
 ```
 
-### GREEN (Step 4)
+`npx tsc --noEmit`: exit 0
 
-After implementing `turnReducer.ts`:
-
-```text
-npm test
-→ exit 0
-Test Files  4 passed (4)
-Tests  13 passed (13)
-Duration  694ms
-```
-
-## Files Created
-
-| File | Purpose |
-|------|---------|
-| `app/src/game/turnReducer.ts` | `GameState`, `Action`, `initialGameState`, `turnReducer` |
-| `app/src/game/turnReducer.test.ts` | 4 tests for SPIN / RESPIN / SHOW_QUESTION / round advance |
-
-## Commit
-
-| SHA | Subject |
-|-----|---------|
-| f3f1b17 | feat: add turn state machine reducer |
-
-## Self-Review
-
-### Matches spec
-
-- `GameState` includes `round`, `turn`, `rotationDeg`, `error`
-- `Action` union: SPIN, SPIN_FINISHED, RESPIN, SHOW_QUESTION, NEXT_TURN
-- SPIN from `idle` only; RESPIN from `clanRevealed` only; illegal actions no-op
-- SPIN/RESPIN pick clan via `pickClan` + `targetWheelRotationDeg` without marking played
-- SHOW_QUESTION marks clan, picks question, updates `usedQuestionIds`, calls `advanceRoundIfComplete`
-- NEXT_TURN clears selection and returns to `idle`
-- Default `rng` = `Math.random`; errors from helpers caught and stored in `state.error`
-- TDD order followed: failing tests → implementation → green
-
-### Deviations / notes
-
-- `clanSectorIndex` imported from `./clans` (not `./spin`) — matches where Task 2 exports it
-
-### Not tested (by design)
-
-- Illegal action no-ops (wrong phase)
-- `error` field population on exhausted clans/questions
-- `SPIN_FINISHED` / `NEXT_TURN` in isolation
+Commands run from `app/`.
 
 ## Concerns
 
-None blocking. `usedQuestionIds` is not reset on round advance (only `playedClanIds` clears per `advanceRoundIfComplete`); confirm Task 5+ expects question pool to carry across rounds.
+None.
 
-## Next Task Handoff
+---
 
-- Import `turnReducer`, `initialGameState`, `Action`, `GameState` from `app/src/game/turnReducer`
-- Wire `useReducer(turnReducer, initialGameState())` in UI (Task 5+)
-- `SPIN_DURATION_MS` available from `./spin` for animation timing
+## Review fix: ScoreTable column header "Persona"
+
+**Finding:** ScoreTable still rendered column header "Clan" on showScores / final podium. Spec requires audience-visible words to say persona, not clan.
+
+**What changed:**
+- `app/src/ui/ScoreTable.tsx`: `<th>Clan</th>` → `<th>Persona</th>`
+- Checked PublicScreen, FinalScreen, SetupScreen: no other audience-visible "Clan"/"clan" labels remained (Setup already uses "Personas" / "persona"; internal types/vars left unchanged).
+
+**Commands:**
+
+```
+cd app
+npx tsc --noEmit
+# TSC_EXIT=0
+
+npm test
+# Test Files  16 passed (16)
+# Tests       91 passed (91)
+```
+
+No component test asserts the header word; full suite re-run for safety.
