@@ -494,6 +494,12 @@
   filter: none;
 }
 
+.host-bar .mute-toggle-btn.is-muted {
+  background: transparent;
+  color: rgba(248, 241, 216, 0.75);
+  border-color: rgba(241, 196, 15, 0.7);
+}
+
 .public-error-banner {
   position: absolute;
   top: calc(var(--projector-safe-y) + 0.25rem);

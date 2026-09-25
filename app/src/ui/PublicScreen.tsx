@@ -89,16 +89,24 @@ export function PublicScreen() {
   useGameSounds(gameState);
 
   const [audioReady, setAudioReady] = useState(false);
+  const [muted, setMutedState] = useState(() => isMuted());
   const unlockedRef = useRef(false);
   const enableAudio = () => {
     if (isMuted()) setMuted(false);
+    setMutedState(false);
     unlockAudio();
     unlockedRef.current = true;
     setAudioReady(true);
   };
   const handleFirstInteraction = () => {
-    if (unlockedRef.current && audioReady && !isMuted()) return;
+    // After unlock, do not force-unmute — mute toggle must stick.
+    if (unlockedRef.current && audioReady) return;
     enableAudio();
+  };
+  const handleToggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    setMutedState(next);
   };
 
   const {
@@ -138,6 +146,16 @@ export function PublicScreen() {
     dispatch({ type: "CANCEL_JUDGE" });
   };
 
+  const muteToggle = (
+    <button
+      type="button"
+      className={`mute-toggle-btn${muted ? " is-muted" : ""}`}
+      onClick={handleToggleMute}
+    >
+      {muted ? "Activar sonidos" : "Silenciar sonidos"}
+    </button>
+  );
+
   const renderHostBar = () => {
     if (mode === "final") return null;
 
@@ -147,6 +165,7 @@ export function PublicScreen() {
           <button type="button" onClick={() => dispatch({ type: "BEGIN_FINALE" })}>
             Continuar
           </button>
+          {muteToggle}
         </div>
       );
     }
@@ -224,6 +243,7 @@ export function PublicScreen() {
             Siguiente
           </button>
         )}
+        {muteToggle}
       </div>
     );
   };

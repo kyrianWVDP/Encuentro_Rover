@@ -78,3 +78,27 @@ npm test
 ```
 
 No component test asserts the header word; full suite re-run for safety.
+
+
+---
+
+## Review fix: Mute on PublicScreen host bar
+
+**Finding:** HostScreen mute toggle (Silenciar / Activar sonidos) was unreachable after `/host` redirected to `/`. Design: PublicScreen gains mute if it already exists. Do not bring back `/host`.
+
+**What changed:**
+- `app/src/ui/PublicScreen.tsx`: mute state + `handleToggleMute` wired like HostScreen (`isMuted` / `setMuted`); mute button on host bar (all non-final phases, including regularComplete Continuar).
+- After audio unlock, pointer/keydown no longer force-unmutes so the toggle sticks; explicit unlock button still unmutes via `enableAudio`.
+- `app/src/ui/PublicScreen.css`: `.mute-toggle-btn.is-muted` variant on host bar.
+
+**Commands:**
+
+```
+cd app
+npx tsc --noEmit
+# TSC_EXIT=0
+
+npm test
+# Test Files  16 passed (16)
+# Tests       91 passed (91)
+```
